@@ -1,0 +1,120 @@
+package com.momentum.app
+import androidx.compose.animation.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.*
+import androidx.compose.foundation.text.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.*
+import androidx.compose.ui.platform.*
+import androidx.compose.ui.semantics.*
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.delay
+import java.time.LocalTime
+
+@Composable fun QuickCapture(onCapture:(String)->Unit,modifier:Modifier=Modifier) {
+ var capture by rememberSaveable {mutableStateOf("")}
+ val keyboard=LocalSoftwareKeyboardController.current
+ fun save(){if(capture.isNotBlank()){onCapture(capture.trim());capture="";keyboard?.hide()}}
+ OutlinedTextField(capture,{capture=it},modifier.fillMaxWidth(),label={Text(tr(R.string.capture))},
+  shape=RoundedCornerShape(18.dp),maxLines=3,
+  keyboardOptions=KeyboardOptions(imeAction=ImeAction.Done),keyboardActions=KeyboardActions(onDone={save()}),
+  trailingIcon={if(capture.isNotBlank())IconButton({save()}){Icon(Icons.Default.Add,tr(R.string.save))}})
+ if(capture.isNotBlank())TextButton({save()},Modifier.fillMaxWidth()){Text(tr(R.string.save))}
+}
+@Composable fun WelcomeScreen(prefs:Prefs,onLanguage:(Boolean)->Unit,onSkip:()->Unit,onBegin:(String)->Unit) {
+ var title by rememberSaveable {mutableStateOf("")}
+ Column(Modifier.fillMaxSize().safeDrawingPadding().imePadding().verticalScroll(rememberScrollState()).padding(28.dp),verticalArrangement=Arrangement.spacedBy(24.dp)) {
+  Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically) {
+   Eyebrow("MOMENTUM");TextButton(onSkip){Text(tr(R.string.ux_skip_for_now_6fc09))}
+  }
+  Spacer(Modifier.height(24.dp))
+  Trail(0)
+  Text(tr(R.string.ux_from_intention_to_a_first_step_e1885),style=MaterialTheme.typography.displaySmall)
+  Text(tr(R.string.ux_you_don_t_need_to_organize_everything__48b4d),style=MaterialTheme.typography.bodyLarge)
+  OutlinedTextField(title,{title=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.capture))},shape=RoundedCornerShape(18.dp),maxLines=4)
+  PrimaryAction(tr(R.string.ux_save_and_start_4074f),{onBegin(title.trim())},enabled=title.isNotBlank())
+  Toggle(tr(R.string.language),prefs.english,onLanguage)
+  Text(tr(R.string.local_only),color=MaterialTheme.colorScheme.onSurfaceVariant)
+ }
+}
+@Composable fun NowScreen(vm:MomentumViewModel,tasks:List<Task>,projects:List<Project>,prefs:Prefs,onStart:(Task)->Unit,onBrowse:()->Unit,onCapture:(String)->Unit,onLater:(Task)->Unit,onQuickCapture:()->Unit,onProject:(Project)->Unit) {
+ var minutes by rememberSaveable {mutableIntStateOf(0)}
+ var easy by rememberSaveable {mutableStateOf(false)}
+ var selectedContext by rememberSaveable {mutableStateOf("")}
+ var showConditions by rememberSaveable {mutableStateOf(false)}
+ var now by remember {mutableLongStateOf(System.currentTimeMillis())}
+ val events by vm.events.collectAsStateWithLifecycle()
+ LaunchedEffect(Unit){while(true){delay(15_000);now=System.currentTimeMillis()}}
+ val candidates=remember(tasks,projects,minutes,easy,selectedContext,now,events){NowPolicy.candidates(tasks,projects,now,minutes,easy,selectedContext,events)}
+ val suggestion=candidates.firstOrNull()
+ LaunchedEffect(suggestion?.task?.id,prefs.suggestions) {if(prefs.suggestions)suggestion?.let {vm.repo.analytics.record("recommended",it.task.id)}}
+ val hour=LocalTime.now().hour
+ Page(spacing=12.dp) {
+  Text(tr(R.string.ux_start_with_something_small_e3a7a),style=MaterialTheme.typography.headlineMedium)
+  Choices(listOf(0,2,5,15,30).map{it.toString() to if(it==0)tr(R.string.ux_your_pace_79575) else "$it ${tr(R.string.minutes)}"},minutes.toString(),{minutes=it.toInt()})
+  AnimatedContent(targetState=if(prefs.suggestions)suggestion?.task?.id else null,label="next step",transitionSpec={if(prefs.reducedMotion)EnterTransition.None togetherWith ExitTransition.None else fadeIn() togetherWith fadeOut()}) {id->
+   val s=candidates.find{it.task.id==id}
+   if(s!=null) {
+    val t=s.task
+    Surface(color=MaterialTheme.colorScheme.background) {
+     Column(Modifier.fillMaxWidth().padding(vertical=8.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
+      Trail(events.count{it.kind in setOf("completed","advanced","milestone")})
+      Text(t.title,style=MaterialTheme.typography.displaySmall)
+      val meta=listOfNotNull(t.estimate?.let{"$it ${tr(R.string.minutes)}"},t.contexts.takeIf{it.isNotBlank()},projects.find{it.id==t.projectId}?.title)
+      if(meta.isNotEmpty())Text(meta.joinToString("  ·  "),style=MaterialTheme.typography.labelLarge)
+      Text(when {
+       events.count{it.taskId==t.id && it.kind=="postponed"}>=3->tr(R.string.ux_this_has_waited_a_few_times_just_the_f_307f9)
+       "priority" in s.reasons->tr(R.string.reason_priority)
+       "fits" in s.reasons->tr(R.string.reason_fits)
+       "due" in s.reasons->tr(R.string.reason_due)
+       else->tr(R.string.ux_start_without_committing_to_finish_2562a)
+      },style=MaterialTheme.typography.bodyMedium)
+      PrimaryAction(tr(R.string.start),{onStart(t)})
+      Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
+       TextButton({vm.defer(t,false);now=System.currentTimeMillis()}){Text(tr(R.string.other))}
+       TextButton({onLater(t);now=System.currentTimeMillis()}){Text(tr(R.string.later))}
+      }
+     }
+    }
+   } else QuietPanel {
+    Icon(Icons.Default.CheckCircleOutline,null,Modifier.size(36.dp),tint=MaterialTheme.colorScheme.primary)
+    Text(when {
+     tasks.isEmpty()->tr(R.string.ux_a_little_room_in_your_mind_806b8)
+     tasks.all{it.status in setOf("DONE","ARCHIVED")}->tr(R.string.ux_what_was_here_is_behind_you_cf4a3)
+     tasks.filter{it.status !in setOf("DONE","ARCHIVED")}.all{it.status=="WAITING"}->tr(R.string.v3_all_waiting)
+     else->tr(R.string.no_suggestion)
+    },style=MaterialTheme.typography.headlineMedium)
+    Text(when {
+     tasks.isEmpty()->tr(R.string.ux_something_small_to_remember_capture_it_e2308)
+     tasks.all{it.status in setOf("DONE","ARCHIVED")}->tr(R.string.ux_you_can_stop_here_the_next_step_can_wa_7fd03)
+     tasks.any{it.status=="WAITING"} && candidates.isEmpty()->tr(R.string.v3_review_waiting)
+     minutes>0 || easy->tr(R.string.ux_nothing_matches_this_choice_yet_change_4f14a)
+     else->tr(R.string.ux_scheduled_tasks_return_when_you_chose__025ff)
+    })
+   }
+  }
+  Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+   FilterChip(easy,{easy=!easy},label={Text(tr(R.string.ux_something_easier_2fe57))})
+   FilterChip(minutes==5,{minutes=if(minutes==5)0 else 5},label={Text(tr(R.string.ux_something_shorter_f310e))})
+  }
+  Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
+   TextButton(onBrowse){Text(tr(R.string.ux_browse_tasks_a1a73))}
+   TextButton({showConditions=!showConditions}){Text(tr(R.string.conditions))}
+  }
+  AnimatedVisibility(showConditions) {Column {OutlinedTextField(selectedContext,{selectedContext=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.context))});Text(tr(R.string.no_geo),style=MaterialTheme.typography.bodySmall)}}
+  val stale=projects.firstOrNull{!it.paused && now-it.updated>7*86_400_000L && tasks.any{t->t.projectId==it.id && t.status !in setOf("DONE","ARCHIVED")}}
+  if(stale!=null)QuietPanel {
+   Eyebrow(tr(R.string.ux_pick_up_the_thread_fd538))
+   Text(stale.title,style=MaterialTheme.typography.titleMedium)
+   Text(stale.nextStep.ifBlank{stale.summary})
+   TextButton({onProject(stale)}){Text(tr(R.string.ux_find_a_project_step_c0b7a))}
+  }
+ }
+}
