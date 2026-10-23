@@ -9,3 +9,7 @@ Share development list opens Android’s chooser with text only. Prepare GitHub 
 The home-screen widget displays a task title and next action on the home screen. Its content may be visible to someone who can see your unlocked phone. Remove the widget if you prefer to keep task text inside the app.
 
 Notifications support reminders, vibration supports optional feedback, and boot completion reschedules reminders. Uninstalling removes private app storage; keep an exported backup if you want to restore later.
+
+## Pinned assignment notification
+
+Keep in notifications is an explicit, optional action in Focus. The app stores one task identifier and an action token locally to restore the chosen notification after a normal restart. This temporary pin is not included in JSON backups. A generic public notification hides task content where Android uses lock-screen redaction; the device owner controls lock-screen notification settings. Removing or dismissing the notification clears the pin without completing the task. This feature does not use a foreground service or network connection.

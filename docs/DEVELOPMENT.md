@@ -42,3 +42,11 @@ Published release certificate SHA-256: `ca17ea6d36bf17afbbff3df179e22539d51688c7
 The public tree excludes private data, device recovery files, internal preservation tests, host-specific scripts, credentials and signing files. Screenshots use synthetic fixtures. Public APKs come from build outputs, never from a device data directory.
 
 No source-code license grant is added by this update. Third-party components retain their own licenses.
+
+## 4.1 widgets and pinned assignments
+
+`CaptureWidget.kt` provides a 1×1 RemoteViews capture action; existing capture intents preserve the keyboard-first flow. `FocusNotification.kt` stores a single explicit session pin outside Room, serializes changes, and uses a distinct notification tag/channel. An action token prevents old notification actions from removing a replacement pin. Task/project observers, app launch and rescheduling broadcasts reconcile state. Completion, waiting, postponement, deletion and project pause remove stale pins. Permission and channel settings are honored.
+
+`Momentum41DeviceTest`, `FocusPinDeniedTest` and `FocusPinRestoreTest` cover capture, private/silent notifications, replacement, dismissal, state changes, denied permission and restoration. Notification/gallery renders use app-owned synthetic content rather than capturing the personal notification shade. Launcher placement remains an Android confirmation.
+
+Android references: [widget size metadata](https://developer.android.com/develop/ui/views/appwidgets/layouts), [Android 14 ongoing notification dismissal](https://developer.android.com/about/versions/14/behavior-changes-all).

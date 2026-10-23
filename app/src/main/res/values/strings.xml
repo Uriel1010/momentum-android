@@ -245,4 +245,15 @@
 <string name="neo_activity">תנועה בשבעת הימים האחרונים</string>
 <string name="neo_activity_desc">פעולות שנשמרו</string>
  <string name="neo_small_steps">גם צעדים קטנים מצטברים.</string>
+ <string name="capture_widget_name">לתפוס מחשבה · 1×1</string>
+ <string name="capture_widget_description">נגיעה אחת לפתיחת מחשבה חדשה</string>
+ <string name="capture_widget_add">להוסיף ווידג׳ט מחשבה 1×1</string>
+ <string name="focus_notification_channel">באמצע משהו</string>
+ <string name="focus_notification_public">צעד קטן מחכה להמשך שלך</string>
+ <string name="focus_notification_pin">להשאיר בתצוגת ההתראות</string>
+ <string name="focus_notification_remove">להסיר מההתראות</string>
+ <string name="focus_notification_return">חזרה למשימה</string>
+ <string name="focus_notification_hint">תזכורת שקטה למשימה אחת, עד שמסיימים או מסירים.</string>
+ <string name="focus_notification_permission">כדי להציג את המשימה, יש לאפשר התראות בהגדרות הטלפון.</string>
+ <string name="focus_notification_settings">הגדרות התראות בטלפון</string>
 </resources>

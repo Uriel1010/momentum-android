@@ -245,4 +245,15 @@
 <string name="neo_activity">Movement over seven days</string>
 <string name="neo_activity_desc">Recorded actions</string>
  <string name="neo_small_steps">Small steps add up.</string>
+ <string name="capture_widget_name">Catch a thought · 1×1</string>
+ <string name="capture_widget_description">One tap to capture a new thought</string>
+ <string name="capture_widget_add">Add 1×1 thought widget</string>
+ <string name="focus_notification_channel">In the middle of something</string>
+ <string name="focus_notification_public">Your current step is ready to continue</string>
+ <string name="focus_notification_pin">Keep in notifications</string>
+ <string name="focus_notification_remove">Remove from notifications</string>
+ <string name="focus_notification_return">Return to task</string>
+ <string name="focus_notification_hint">One silent reminder, until you finish or remove it.</string>
+ <string name="focus_notification_permission">Allow notifications in phone settings to keep this task visible.</string>
+ <string name="focus_notification_settings">Phone notification settings</string>
 </resources>

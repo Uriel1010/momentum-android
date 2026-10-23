@@ -110,7 +110,8 @@ class MomentumApp:Application(), androidx.work.Configuration.Provider {
  override fun onCreate() { super.onCreate(); scope.launch { repo.reschedule() }
   scope.launch {
    combine(db.dao().tasks(),db.dao().projects(),db.dao().events(),prefs.flow){_,_,_,_->Unit}.conflate().collect {
-    try { MomentumWidget.updateAll(this@MomentumApp) } catch(_:Exception) { /* Widget can retry at the next update. */ }
+    try { MomentumWidget.updateAll(this@MomentumApp);CaptureWidget.updateAll(this@MomentumApp) } catch(_:Exception) { /* Widget can retry at the next update. */ }
+    try { FocusNotification.refresh(this@MomentumApp) } catch(_:Exception) { /* Retry on next task change or launch. */ }
    }
   }
  }

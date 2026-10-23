@@ -52,6 +52,7 @@ import androidx.lifecycle.repeatOnLifecycle
   OutlinedButton({progress=true;note=""},Modifier.fillMaxWidth().heightIn(min=56.dp)){Text(tr(R.string.advanced_progress))}
   TextButton({blocker=true},Modifier.fillMaxWidth().heightIn(min=48.dp)){Text(tr(R.string.stuck))}
   TextButton({restStarted=System.currentTimeMillis();recovering=true},Modifier.fillMaxWidth().heightIn(min=48.dp)){Text(tr(R.string.neo_rest))}
+  FocusPinControl(vm,t)
   HorizontalDivider()
   Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
    TextButton({vm.work{vm.repo.postpone(t,900_000)};stop();onExit()}){Text(tr(R.string.ux_pause_for_15_min_e99c1))}
@@ -61,7 +62,7 @@ import androidx.lifecycle.repeatOnLifecycle
  if(recovering)RecoveryMoment(restStarted,onResume={
   if(timerStart>0){timerStart+=System.currentTimeMillis()-restStarted;timer.edit{putLong(t.id,timerStart)}}
   recovering=false
- },onFinish={stop();recovering=false;onExit()})
+ },onFinish={stop();vm.work{FocusNotification.remove(context,taskId=t.id)};recovering=false;onExit()})
  if(blocker)ModalBottomSheet(onDismissRequest={blocker=false},sheetState=rememberModalBottomSheetState(skipPartiallyExpanded=true)) {
   Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal=24.dp).padding(bottom=32.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
    Heading(tr(R.string.ux_what_would_help_now_9c0e0))

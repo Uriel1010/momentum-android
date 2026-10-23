@@ -48,7 +48,7 @@ class MainActivity:ComponentActivity() {
    Momentum(vm,sharedText,focusId,{sharedText=""},{focusId=null},captureRequested,{captureRequested=false})
   }
  }
- override fun onStart(){super.onStart();val restoring=restoringActivity;restoringActivity=false;(application as MomentumApp).scope.launch{(application as MomentumApp).repo.analytics.open(restoring=restoring)}}
+ override fun onStart(){super.onStart();val restoring=restoringActivity;restoringActivity=false;(application as MomentumApp).scope.launch{(application as MomentumApp).repo.analytics.open(restoring=restoring);FocusNotification.refresh(this@MainActivity)}}
  override fun onNewIntent(intent:Intent) {super.onNewIntent(intent);setIntent(intent);readIntent(intent)}
  private fun readIntent(intent:Intent) {
   captureRequested=intent.action=="com.momentum.CAPTURE"
