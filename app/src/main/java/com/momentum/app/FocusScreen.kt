@@ -17,6 +17,8 @@ import androidx.lifecycle.repeatOnLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable fun FocusScreen(vm:MomentumViewModel,t:Task,prefs:Prefs,onComplete:()->Unit,onEdit:()->Unit,onExit:()->Unit) {
+ var recovering by rememberSaveable {mutableStateOf(false)}
+ var restStarted by rememberSaveable {mutableLongStateOf(0)}
  var waitingNote by rememberSaveable {mutableStateOf(false)}
  var blocker by rememberSaveable {mutableStateOf(false)}
  var micro by rememberSaveable {mutableStateOf(false)}
@@ -33,9 +35,8 @@ import androidx.lifecycle.repeatOnLifecycle
  LaunchedEffect(timerStart,lifecycle){lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED){while(timerStart>0){elapsed=((System.currentTimeMillis()-timerStart)/1000).coerceAtLeast(0);delay(1000)}}}
  Page(spacing=24.dp) {
   Eyebrow(tr(R.string.focus))
-  Text(t.title,style=MaterialTheme.typography.displaySmall)
-  Column(Modifier.fillMaxWidth().padding(vertical=16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-   Trail(steps)
+  Text(t.title,style=MaterialTheme.typography.displayMedium)
+  Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerLow,Rhythm.card).padding(20.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
    Eyebrow(tr(R.string.next_action))
    Text(t.nextAction.ifBlank{tr(R.string.ux_just_begin_you_can_stop_after_a_moment_60275)},style=MaterialTheme.typography.headlineSmall)
    if(t.nextAction.isBlank())TextButton({micro=true;note=""}){Text(tr(R.string.ux_define_a_small_step_80d1e))}
@@ -50,12 +51,17 @@ import androidx.lifecycle.repeatOnLifecycle
   PrimaryAction(tr(R.string.finish),{stop();onComplete()})
   OutlinedButton({progress=true;note=""},Modifier.fillMaxWidth().heightIn(min=56.dp)){Text(tr(R.string.advanced_progress))}
   TextButton({blocker=true},Modifier.fillMaxWidth().heightIn(min=48.dp)){Text(tr(R.string.stuck))}
+  TextButton({restStarted=System.currentTimeMillis();recovering=true},Modifier.fillMaxWidth().heightIn(min=48.dp)){Text(tr(R.string.neo_rest))}
   HorizontalDivider()
   Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
    TextButton({vm.work{vm.repo.postpone(t,900_000)};stop();onExit()}){Text(tr(R.string.ux_pause_for_15_min_e99c1))}
    TextButton(onEdit){Text(tr(R.string.edit))}
   }
  }
+ if(recovering)RecoveryMoment(restStarted,onResume={
+  if(timerStart>0){timerStart+=System.currentTimeMillis()-restStarted;timer.edit{putLong(t.id,timerStart)}}
+  recovering=false
+ },onFinish={stop();recovering=false;onExit()})
  if(blocker)ModalBottomSheet(onDismissRequest={blocker=false},sheetState=rememberModalBottomSheetState(skipPartiallyExpanded=true)) {
   Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal=24.dp).padding(bottom=32.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
    Heading(tr(R.string.ux_what_would_help_now_9c0e0))

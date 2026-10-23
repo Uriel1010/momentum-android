@@ -77,6 +77,11 @@ class Momentum3DeviceTest {
   waitText("Capture a thought")
   compose.onNodeWithText("Progress").performClick()
   compose.onNodeWithText("You came back. Continue from here.").assertExists()
-  compose.onAllNodesWithText("Return after a week").assertCountEquals(2)
+  val entries=runBlocking{app.db.dao().allEvents().filter{it.kind in setOf("started","completed")}}
+  assertEquals(2,entries.size)
+  entries.forEach{event->
+   compose.onNode(hasScrollToIndexAction()).performScrollToKey(event.id)
+   compose.onNode(hasText(if(event.kind=="started")"Started" else "Completed") and hasAnySibling(hasText("Return after a week"))).assertExists()
+  }
  }
 }

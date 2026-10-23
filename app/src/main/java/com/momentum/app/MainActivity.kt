@@ -8,7 +8,7 @@ import androidx.activity.*
 import androidx.activity.compose.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
-import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.*
 import androidx.compose.ui.semantics.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -74,10 +74,11 @@ val LocalEnglish=staticCompositionLocalOf {false}
  val localizedConfig=remember(systemConfig,prefs.english) {Configuration(systemConfig).apply {setLocale(Locale.forLanguageTag(if(prefs.english)"en" else "he"))}}
  val localized=remember(base,localizedConfig){android.view.ContextThemeWrapper(base,R.style.Theme_Momentum).apply {applyOverrideConfiguration(localizedConfig)}}
  val dark=isSystemInDarkTheme()
- val colors=if(prefs.dynamic && Build.VERSION.SDK_INT>=31) {if(dark)dynamicDarkColorScheme(base) else dynamicLightColorScheme(base)} else momentumColors(dark)
+ val brand=momentumColors(dark)
+ val colors=if(prefs.dynamic && Build.VERSION.SDK_INT>=31) {if(dark)dynamicDarkColorScheme(base) else dynamicLightColorScheme(base)} else brand
 
  CompositionLocalProvider(LocalReduceMotion provides prefs.reducedMotion,LocalEnglish provides prefs.english,LocalContext provides localized,LocalConfiguration provides localizedConfig,LocalLayoutDirection provides if(prefs.english)LayoutDirection.Ltr else LayoutDirection.Rtl) {
- MaterialTheme(colorScheme=colors,typography=MomentumTypography) { Surface(Modifier.fillMaxSize()) { AppContent(vm,shared,focusId,consumeShare,consumeFocus,captureRequested,consumeCapture) } }
+ MaterialTheme(colorScheme=colors.copy(primary=brand.primary,onPrimary=brand.onPrimary,primaryContainer=Neo.Lime,onPrimaryContainer=Neo.Ink,secondaryContainer=Neo.Purple,onSecondaryContainer=Neo.Ink),typography=MomentumTypography,shapes=Shapes(small=RoundedCornerShape(12.dp),medium=RoundedCornerShape(16.dp),large=RoundedCornerShape(22.dp),extraLarge=RoundedCornerShape(26.dp))) { Surface(Modifier.fillMaxSize()) { AppContent(vm,shared,focusId,consumeShare,consumeFocus,captureRequested,consumeCapture) } }
  }
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,6 +93,15 @@ val LocalEnglish=staticCompositionLocalOf {false}
  val snackbar=remember {SnackbarHostState()}
  val scope=rememberCoroutineScope()
  val context=LocalContext.current
+ val systemDark=isSystemInDarkTheme()
+ SideEffect {
+  var host:Context?=context
+  while(host is ContextWrapper && host !is Activity)host=host.baseContext
+  (host as? Activity)?.let{activity->androidx.core.view.WindowCompat.getInsetsController(activity.window,activity.window.decorView).apply{
+   isAppearanceLightStatusBars=!route.startsWith("focus") && !systemDark
+   isAppearanceLightNavigationBars=!route.startsWith("focus") && !systemDark
+  }}
+ }
  var editorId by rememberSaveable {mutableStateOf<String?>(null)}
  var newTask by rememberSaveable {mutableStateOf(false)}
  var initialText by rememberSaveable {mutableStateOf("")}
@@ -143,15 +153,21 @@ val LocalEnglish=staticCompositionLocalOf {false}
   });return
  }
 
+ MaterialTheme(colorScheme=if(route.startsWith("focus"))momentumColors(true) else MaterialTheme.colorScheme) {
  Scaffold(
-  topBar={TopAppBar(title={Column {if(!route.startsWith("focus"))Text("MOMENTUM",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Medium);}},
+  topBar={TopAppBar(title={Column {if(!route.startsWith("focus"))Text("MOMENTUM",style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Black);}},
    navigationIcon={if(route !in listOf("now","tasks","projects","progress"))IconButton({nav.popBackStack()}){Icon(Icons.AutoMirrored.Filled.ArrowBack,tr(R.string.back))}},
    actions={if(!route.startsWith("focus"))IconButton({nav.navigate("settings"){launchSingleTop=true}}){Icon(Icons.Default.Tune,tr(R.string.settings))}})},
   bottomBar={if(route in listOf("now","tasks","projects","progress"))Column(Modifier.background(MaterialTheme.colorScheme.surfaceContainerLow)){
-   FilledTonalButton(onClick={initialText="";taskProject=null;newTask=true},modifier=Modifier.fillMaxWidth().padding(horizontal=24.dp).padding(top=8.dp).heightIn(min=48.dp)){Icon(Icons.Default.Add,null);Spacer(Modifier.width(8.dp));Text(tr(R.string.v3_capture))}
-   NavigationBar(containerColor=MaterialTheme.colorScheme.surfaceContainerLow,tonalElevation=0.dp) {
-   val destinations=listOf(Triple("now",R.string.now,Icons.Default.Adjust),Triple("tasks",R.string.tasks,Icons.AutoMirrored.Filled.List),Triple("projects",R.string.projects,Icons.Default.FolderOpen),Triple("progress",R.string.progress,Icons.Default.Route))
-   destinations.forEach {(r,label,icon)->NavigationBarItem(selected=route==r,onClick={nav.navigate(r){popUpTo("now"){saveState=true};launchSingleTop=true;restoreState=true}},icon={Icon(icon,null)},label={Text(tr(label),maxLines=2,style=if(LocalConfiguration.current.fontScale>1.3f)MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium,textAlign=androidx.compose.ui.text.style.TextAlign.Center)})}
+   TextButton(onClick={initialText="";taskProject=null;newTask=true},modifier=Modifier.fillMaxWidth().heightIn(min=48.dp)){Icon(Icons.Default.Add,null);Spacer(Modifier.width(8.dp));Text(tr(R.string.v3_capture))}
+   HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
+   Row(Modifier.fillMaxWidth().navigationBarsPadding().selectableGroup()) {
+    val destinations=listOf(Triple("now",R.string.now,Icons.Default.Adjust),Triple("tasks",R.string.tasks,Icons.AutoMirrored.Filled.List),Triple("projects",R.string.projects,Icons.Default.FolderOpen),Triple("progress",R.string.progress,Icons.Default.BarChart))
+    destinations.forEach{(r,label,icon)->Column(Modifier.weight(1f).heightIn(min=68.dp).selectable(selected=route==r,role=Role.Tab,onClick={nav.navigate(r){popUpTo("now"){saveState=true};launchSingleTop=true;restoreState=true}}).padding(horizontal=4.dp,vertical=10.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(4.dp)) {
+     Icon(icon,null,Modifier.size(24.dp),tint=if(route==r)MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)
+     Text(tr(label),style=MaterialTheme.typography.labelSmall,maxLines=2,textAlign=androidx.compose.ui.text.style.TextAlign.Center,color=if(route==r)MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)
+     Box(Modifier.width(18.dp).height(3.dp).background(if(route==r)Neo.Lime else Color.Transparent))
+    }}
   }}},
   snackbarHost={SnackbarHost(snackbar) {data->AccomplishmentSnackbar(data)}},
   floatingActionButton={}
@@ -165,7 +181,7 @@ val LocalEnglish=staticCompositionLocalOf {false}
    composable("focus/{id}") {entry->val task=tasks.find{it.id==entry.arguments?.getString("id")}
     if(task!=null)FocusScreen(vm,task,prefs,onComplete={complete(task){nav.popBackStack()}},onEdit={edit(task)},onExit={nav.popBackStack()})
    }
-   composable("projects") {ProjectList(projects,onOpen={nav.navigate("project/${it.id}")},onAdd={newProject=true})}
+   composable("projects") {ProjectList(projects,onOpen={nav.navigate("project/${it.id}")},onAdd={newProject=true},tasks=tasks)}
    composable("project/{id}") {entry->projects.find{it.id==entry.arguments?.getString("id")}?.let {p->
     ProjectScreen(vm,p,tasks.filter{it.projectId==p.id},events.filter{it.projectId==p.id},onEdit={projectEditor=p.id},onAdd={taskProject=p.id;initialText="";newTask=true},onTask=::edit,onStart={pulse(context,prefs.feedback,Touch.START);vm.work{vm.repo.start(it);nav.navigate("focus/${it.id}")}})
    }}
@@ -173,6 +189,7 @@ val LocalEnglish=staticCompositionLocalOf {false}
    composable("settings") {SettingsScreen(vm,prefs,onExport={export.launch("momentum-backup.json")},onRestore={restoreConfirm=true},onSuggestions={nav.navigate("development")})}
    composable("development") {DevelopmentScreen(vm)}
   }
+ }
  }
  if(newTask)CaptureSheet(initialText,taskProject,projects,onDismiss={newTask=false;initialText="";taskProject=null},onSave={t->vm.work {
   vm.repo.save(t);newTask=false;initialText="";taskProject=null
@@ -194,8 +211,4 @@ val LocalEnglish=staticCompositionLocalOf {false}
 @Composable fun Toggle(label:String,value:Boolean,onChange:(Boolean)->Unit) {
  Row(Modifier.fillMaxWidth().heightIn(min=56.dp).toggleable(value=value,role=Role.Switch,onValueChange=onChange),verticalAlignment=Alignment.CenterVertically) {Text(label,Modifier.weight(1f));Switch(value,null)}
 }
-@Composable fun Choices(items:List<Pair<String,String>>,selected:String,onSelect:(String)->Unit) {
- Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-  items.forEach {(id,label)->FilterChip(selected==id,{onSelect(id)},label={Text(label)})}
- }
-}
+@Composable fun Choices(items:List<Pair<String,String>>,selected:String,onSelect:(String)->Unit) {SegmentChoices(items,selected,onSelect)}

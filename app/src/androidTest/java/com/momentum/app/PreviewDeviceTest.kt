@@ -81,6 +81,8 @@ class PreviewDeviceTest {
 
   compose.onNodeWithText(localized("מתחילים","Let’s start")).performScrollTo().performClick()
   compose.onNodeWithText(localized("דבר אחד בכל פעם","One thing at a time")).assertExists();shot("focus")
+  compose.onNodeWithText(localized("רגע של הפסקה","Take a breather")).performScrollTo().performClick();shot("recovery")
+  compose.onNodeWithText(localized("ממשיכים כשמוכנים","Continue when ready")).performScrollTo().performClick()
   compose.onNodeWithContentDescription(localized("חזרה","Back")).performClick()
   compose.onNodeWithText(localized("פרויקטים","Projects")).performClick();shot("projects")
   compose.onNodeWithText(localized("מרחב לכתיבה","A space for writing")).performClick()

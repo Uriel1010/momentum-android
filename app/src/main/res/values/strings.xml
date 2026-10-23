@@ -229,4 +229,20 @@
 <string name="widget_refresh">רענון</string>
 <string name="widget_add">הוספת ווידג׳ט למסך הבית</string>
 <string name="widget_help">לחצו לחיצה ארוכה במסך הבית, בחרו ווידג׳טים ואז מומנטום.</string>
+<string name="neo_now_heading">בואו נתקדם.\nבמשהו קטן.</string>
+<string name="neo_now_body">לא צריך לסיים הכול. רק ליצור תנועה.</string>
+<string name="neo_next_small">הצעד הקטן הבא שלכם</string>
+<string name="neo_rest">רגע של הפסקה</string>
+<string name="neo_breathe">קחו רגע.</string>
+<string name="neo_rest_body">גם הפסקה היא חלק מהתהליך. הצעד הבא יחכה לכם כשתחזרו.</string>
+<string name="neo_continue">ממשיכים כשמוכנים</string>
+<string name="neo_finish_today">לסיים להיום</string>
+<string name="neo_projects_heading">הפרויקטים שלי.</string>
+<string name="neo_progress_heading">אתם בתנועה.</string>
+<string name="neo_starts">התחלות</string>
+<string name="neo_advances">צעדים קדימה</string>
+<string name="neo_completions">הושלמו</string>
+<string name="neo_activity">תנועה בשבעת הימים האחרונים</string>
+<string name="neo_activity_desc">פעולות שנשמרו</string>
+ <string name="neo_small_steps">גם צעדים קטנים מצטברים.</string>
 </resources>

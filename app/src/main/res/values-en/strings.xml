@@ -229,4 +229,20 @@
 <string name="widget_refresh">Refresh</string>
 <string name="widget_add">Add home-screen widget</string>
 <string name="widget_help">Long-press your home screen, choose Widgets, then Momentum.</string>
+<string name="neo_now_heading">One small move.</string>
+<string name="neo_now_body">You do not have to finish everything. Just begin.</string>
+<string name="neo_next_small">YOUR NEXT SMALL STEP</string>
+<string name="neo_rest">Take a breather</string>
+<string name="neo_breathe">Take a breath.</string>
+<string name="neo_rest_body">Rest is part of the process. Your next step will be here when you return.</string>
+<string name="neo_continue">Continue when ready</string>
+<string name="neo_finish_today">Finish for today</string>
+<string name="neo_projects_heading">Your projects.\nYour next moves.</string>
+<string name="neo_progress_heading">You are moving.</string>
+<string name="neo_starts">Starts</string>
+<string name="neo_advances">Advances</string>
+<string name="neo_completions">Completed</string>
+<string name="neo_activity">Movement over seven days</string>
+<string name="neo_activity_desc">Recorded actions</string>
+ <string name="neo_small_steps">Small steps add up.</string>
 </resources>

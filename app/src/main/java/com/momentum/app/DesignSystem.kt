@@ -5,7 +5,9 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.*
+import androidx.compose.foundation.selection.*
+import androidx.compose.ui.draw.*
 import androidx.compose.foundation.interaction.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,48 +23,75 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.unit.*
 
-object Rhythm {
- val page=24.dp
- val gap=16.dp
- val card=RoundedCornerShape(28.dp)
- const val transition=220
+object Neo {
+ val Lime=Color(0xFFD7FF3F);val Purple=Color(0xFFC9B8FF);val Paper=Color(0xFFFAF7F2)
+ val Ink=Color(0xFF0F0F10);val Concrete=Color(0xFFE6E6E6)
 }
+object Rhythm {val page=24.dp;val gap=16.dp;val card=RoundedCornerShape(20.dp);const val transition=220}
 val LocalReduceMotion=staticCompositionLocalOf {false}
-val MomentumFont=FontFamily(Font(R.font.heebo_regular,FontWeight.Normal),Font(R.font.heebo_medium,FontWeight.Medium),Font(R.font.heebo_bold,FontWeight.Bold))
+val MomentumFont=FontFamily(Font(R.font.heebo_regular,FontWeight.Normal),Font(R.font.heebo_medium,FontWeight.Medium),Font(R.font.heebo_bold,FontWeight.Bold),Font(R.font.heebo_black,FontWeight.Black))
 private fun type(size:Int,line:Int,weight:FontWeight=FontWeight.Normal)=TextStyle(fontFamily=MomentumFont,fontSize=size.sp,lineHeight=line.sp,fontWeight=weight)
 val MomentumTypography=Typography(
- displayLarge=type(64,70,FontWeight.Medium),displayMedium=type(52,60,FontWeight.Medium),displaySmall=type(40,48,FontWeight.Medium),
- headlineLarge=type(34,42,FontWeight.Medium),headlineMedium=type(28,36,FontWeight.Medium),headlineSmall=type(24,32,FontWeight.Medium),
- titleLarge=type(22,30,FontWeight.Medium),titleMedium=type(18,26,FontWeight.Medium),titleSmall=type(16,24,FontWeight.Medium),
+ displayLarge=type(60,66,FontWeight.Black),displayMedium=type(48,54,FontWeight.Black),displaySmall=type(38,44,FontWeight.Black),
+ headlineLarge=type(34,40,FontWeight.Black),headlineMedium=type(28,34,FontWeight.Black),headlineSmall=type(24,30,FontWeight.Bold),
+ titleLarge=type(22,28,FontWeight.Bold),titleMedium=type(18,25,FontWeight.Bold),titleSmall=type(16,22,FontWeight.Bold),
  bodyLarge=type(17,26),bodyMedium=type(15,23),bodySmall=type(14,21),
- labelLarge=type(15,22,FontWeight.Medium),labelMedium=type(14,20,FontWeight.Medium),labelSmall=type(12,18,FontWeight.Medium))
+ labelLarge=type(15,22,FontWeight.Bold),labelMedium=type(13,19,FontWeight.Medium),labelSmall=type(12,18,FontWeight.Medium))
 fun momentumColors(dark:Boolean)=if(dark)darkColorScheme(
- primary=Color(0xFFBED8A3),onPrimary=Color(0xFF20351E),primaryContainer=Color(0xFF2E4934),onPrimaryContainer=Color(0xFFE7F0DC),
- secondary=Color(0xFFC8C4AF),onSecondary=Color(0xFF302F25),secondaryContainer=Color(0xFF393E32),onSecondaryContainer=Color(0xFFE4E5D7),
- tertiary=Color(0xFFE7BD82),onTertiary=Color(0xFF422D10),tertiaryContainer=Color(0xFF4D3C24),onTertiaryContainer=Color(0xFFFFDFB2),
- background=Color(0xFF151C18),onBackground=Color(0xFFF0EFE5),surface=Color(0xFF151C18),onSurface=Color(0xFFF0EFE5),
- surfaceVariant=Color(0xFF333D33),onSurfaceVariant=Color(0xFFBDC6B9),outline=Color(0xFF8E998B),outlineVariant=Color(0xFF3D483D),
- surfaceContainerLowest=Color(0xFF101612),surfaceContainerLow=Color(0xFF1C251F),surfaceContainer=Color(0xFF222D25),surfaceContainerHigh=Color(0xFF2A352D),surfaceContainerHighest=Color(0xFF323F35))
+ primary=Neo.Lime,onPrimary=Neo.Ink,primaryContainer=Neo.Lime,onPrimaryContainer=Neo.Ink,
+ secondary=Neo.Purple,onSecondary=Neo.Ink,secondaryContainer=Neo.Purple,onSecondaryContainer=Neo.Ink,
+ tertiary=Neo.Purple,onTertiary=Neo.Ink,tertiaryContainer=Color(0xFF352D47),onTertiaryContainer=Neo.Paper,
+ background=Neo.Ink,onBackground=Neo.Paper,surface=Neo.Ink,onSurface=Neo.Paper,
+ surfaceVariant=Color(0xFF29292B),onSurfaceVariant=Color(0xFFC7C5C2),outline=Color(0xFF94918D),outlineVariant=Color(0xFF48474A),
+ surfaceContainerLowest=Color(0xFF080809),surfaceContainerLow=Color(0xFF1B1B1D),surfaceContainer=Color(0xFF222224),surfaceContainerHigh=Color(0xFF29292B),surfaceContainerHighest=Color(0xFF343437))
 else lightColorScheme(
- primary=Color(0xFF315D3B),onPrimary=Color.White,primaryContainer=Color(0xFFE0EACF),onPrimaryContainer=Color(0xFF213D27),
- secondary=Color(0xFF5F6654),onSecondary=Color.White,secondaryContainer=Color(0xFFE9E9DA),onSecondaryContainer=Color(0xFF353E2E),
- tertiary=Color(0xFF78552D),onTertiary=Color.White,tertiaryContainer=Color(0xFFF3DFC2),onTertiaryContainer=Color(0xFF513618),
- background=Color(0xFFF8F6EE),onBackground=Color(0xFF252D24),surface=Color(0xFFF8F6EE),onSurface=Color(0xFF252D24),
- surfaceVariant=Color(0xFFE4E7DA),onSurfaceVariant=Color(0xFF596250),outline=Color(0xFF747E6D),outlineVariant=Color(0xFFD0D6C5),
- surfaceContainerLowest=Color.White,surfaceContainerLow=Color(0xFFF1F0E5),surfaceContainer=Color(0xFFECEDE0),surfaceContainerHigh=Color(0xFFE5E8D9),surfaceContainerHighest=Color(0xFFDDE2D1))
+ primary=Neo.Ink,onPrimary=Neo.Paper,primaryContainer=Neo.Lime,onPrimaryContainer=Neo.Ink,
+ secondary=Color(0xFF55416F),onSecondary=Color.White,secondaryContainer=Neo.Purple,onSecondaryContainer=Neo.Ink,
+ tertiary=Color(0xFF55416F),onTertiary=Color.White,tertiaryContainer=Color(0xFFE9E0FF),onTertiaryContainer=Neo.Ink,
+ background=Neo.Paper,onBackground=Neo.Ink,surface=Neo.Paper,onSurface=Neo.Ink,
+ surfaceVariant=Neo.Concrete,onSurfaceVariant=Color(0xFF565351),outline=Color(0xFF74706D),outlineVariant=Color(0xFFC9C6C1),
+ surfaceContainerLowest=Color.White,surfaceContainerLow=Color(0xFFF0EDE8),surfaceContainer=Color(0xFFECE8E3),surfaceContainerHigh=Neo.Concrete,surfaceContainerHighest=Color(0xFFDAD6D1))
 @Composable fun words(he:String,en:String)=if(LocalEnglish.current)en else he
 
-@Composable fun PrimaryAction(label:String,onClick:()->Unit,modifier:Modifier=Modifier,enabled:Boolean=true) {
- val interaction=remember {MutableInteractionSource()}
- val pressed by interaction.collectIsPressedAsState()
- val scale by animateFloatAsState(if(pressed && !LocalReduceMotion.current).975f else 1f,spring(dampingRatio=.72f,stiffness=500f),label="action press")
- Button(onClick,modifier.fillMaxWidth().heightIn(min=58.dp).graphicsLayer{scaleX=scale;scaleY=scale},enabled=enabled,
-  shape=RoundedCornerShape(18.dp),interactionSource=interaction,contentPadding=PaddingValues(16.dp)) {Text(label,style=MaterialTheme.typography.titleMedium)}
+@Composable fun PrimaryAction(label:String,onClick:()->Unit,modifier:Modifier=Modifier,enabled:Boolean=true,ink:Boolean=false) {
+ val interaction=remember {MutableInteractionSource()};val pressed by interaction.collectIsPressedAsState()
+ val offset by animateFloatAsState(if(pressed && !LocalReduceMotion.current)2f else 0f,if(LocalReduceMotion.current)snap() else spring(dampingRatio=1f,stiffness=600f),label="action press")
+ val fill=if(!enabled)MaterialTheme.colorScheme.surfaceVariant else if(ink)Neo.Ink else Neo.Lime
+ val foreground=if(!enabled)MaterialTheme.colorScheme.onSurfaceVariant else if(ink)Neo.Lime else Neo.Ink
+ Box(modifier.fillMaxWidth().heightIn(min=56.dp).graphicsLayer{translationY=offset.dp.toPx()}.clip(RoundedCornerShape(16.dp)).background(fill)
+  .clickable(enabled=enabled,role=Role.Button,interactionSource=interaction,indication=null,onClick=onClick).padding(horizontal=20.dp,vertical=16.dp),contentAlignment=androidx.compose.ui.Alignment.Center) {
+  Text(label,style=MaterialTheme.typography.titleMedium,color=foreground,textAlign=androidx.compose.ui.text.style.TextAlign.Center)
+ }
 }
-@Composable fun Eyebrow(text:String) {Text(text,style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.primary)}
+@Composable fun Eyebrow(text:String) {Text(text,style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.onSurfaceVariant)}
 @Composable fun QuietPanel(modifier:Modifier=Modifier,content:@Composable ColumnScope.()->Unit) {
- Surface(modifier.fillMaxWidth(),shape=Rhythm.card,color=MaterialTheme.colorScheme.surfaceContainerLow) {
-  Column(Modifier.padding(22.dp),verticalArrangement=Arrangement.spacedBy(12.dp),content=content)
+ Column(modifier.fillMaxWidth().clip(Rhythm.card).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(20.dp),verticalArrangement=Arrangement.spacedBy(12.dp),content=content)
+}
+@Composable fun ActionPanel(content:@Composable ColumnScope.()->Unit) {
+ Box(Modifier.fillMaxWidth().padding(bottom=5.dp,end=5.dp).drawBehind {
+  drawRoundRect(Neo.Ink,topLeft=Offset(5.dp.toPx(),5.dp.toPx()),cornerRadius=androidx.compose.ui.geometry.CornerRadius(22.dp.toPx()))
+ }) {
+  Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Neo.Lime).border(2.dp,Neo.Ink,RoundedCornerShape(22.dp)).padding(22.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
+   CompositionLocalProvider(LocalContentColor provides Neo.Ink,content={content()})
+  }
+ }
+}
+@Composable fun InkUnderline(modifier:Modifier=Modifier) {
+ Canvas(modifier.width(118.dp).height(12.dp).clearAndSetSemantics{}) {
+  drawLine(Neo.Lime,Offset(2f,size.height*.8f),Offset(size.width,size.height*.1f),4.dp.toPx(),StrokeCap.Round)
+  drawLine(Neo.Lime,Offset(size.width*.25f,size.height*.9f),Offset(size.width*.82f,size.height*.6f),2.dp.toPx(),StrokeCap.Round)
+ }
+}
+@Composable fun SegmentChoices(items:List<Pair<String,String>>,selected:String,onSelect:(String)->Unit) {
+ Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).selectableGroup(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+  items.forEach{(id,label)->
+   val active=id==selected
+   Box(Modifier.heightIn(min=48.dp).clip(RoundedCornerShape(12.dp)).background(if(active)MaterialTheme.colorScheme.onSurface else Color.Transparent)
+    .border(1.dp,if(active)MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outlineVariant,RoundedCornerShape(12.dp))
+    .selectable(selected=active,role=Role.RadioButton,onClick={onSelect(id)}).padding(horizontal=16.dp,vertical=12.dp),contentAlignment=androidx.compose.ui.Alignment.Center) {
+    Text(label,style=MaterialTheme.typography.labelMedium,color=if(active)MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurfaceVariant)
+   }
+  }
  }
 }
 /** Trail nodes represent real events only. Decorative geometry is excluded from semantics. */

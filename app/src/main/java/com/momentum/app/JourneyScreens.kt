@@ -12,29 +12,32 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.semantics.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.*
 
-@Composable fun ProjectList(projects:List<Project>,onOpen:(Project)->Unit,onAdd:()->Unit) {
- LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(24.dp,20.dp,24.dp,100.dp),verticalArrangement=Arrangement.spacedBy(20.dp)) {
-  item {Heading(tr(R.string.projects))}
+@Composable fun ProjectList(projects:List<Project>,onOpen:(Project)->Unit,onAdd:()->Unit,tasks:List<Task> = emptyList()) {
+ var filter by rememberSaveable{mutableStateOf("all")}
+ val visible=projects.filter{filter=="all" || (filter=="paused")==it.paused}
+ LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(24.dp,20.dp,24.dp,32.dp),verticalArrangement=Arrangement.spacedBy(18.dp)) {
+  item {Text(tr(R.string.neo_projects_heading),style=MaterialTheme.typography.displaySmall)}
   item {Text(tr(R.string.ux_keep_the_thread_return_to_the_next_ste_abf5f),color=MaterialTheme.colorScheme.onSurfaceVariant)}
-  item {OutlinedButton(onAdd,Modifier.heightIn(min=52.dp)){Icon(Icons.Default.Add,null);Spacer(Modifier.width(8.dp));Text(tr(R.string.new_project))}}
-  if(projects.isEmpty())item {QuietPanel{Trail(0);Text(tr(R.string.project_empty))}}
-  items(projects,key={it.id}) {p->
-   Surface(onClick={onOpen(p)},shape=Rhythm.card,color=MaterialTheme.colorScheme.surfaceContainerLow) {
-    Column(Modifier.fillMaxWidth().padding(24.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
-      Icon(Icons.Default.Route,null,tint=MaterialTheme.colorScheme.primary)
-      Text(if(p.paused)tr(R.string.ux_paused_c7dfb) else tr(R.string.ux_active_a733b),style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
+  item {Choices(listOf("all" to tr(R.string.dev_all),"active" to tr(R.string.ux_active_a733b),"paused" to tr(R.string.ux_paused_c7dfb)),filter){filter=it}}
+  item {TextButton(onAdd,Modifier.heightIn(min=48.dp)){Icon(Icons.Default.Add,null);Spacer(Modifier.width(8.dp));Text(tr(R.string.new_project))}}
+  if(visible.isEmpty())item {QuietPanel{Text(tr(R.string.project_empty))}}
+  items(visible,key={it.id}) {p->
+   val steps=tasks.filter{it.projectId==p.id && it.status!="ARCHIVED"};val done=steps.count{it.status=="DONE"}
+   Column(Modifier.fillMaxWidth().clickable(role=androidx.compose.ui.semantics.Role.Button,onClick={onOpen(p)}).padding(vertical=8.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
+    Row(verticalAlignment=Alignment.Top,horizontalArrangement=Arrangement.spacedBy(16.dp)) {
+     Box(Modifier.size(52.dp).background(if(p.paused)Neo.Purple else MaterialTheme.colorScheme.surfaceVariant,RoundedCornerShape(12.dp)),contentAlignment=Alignment.Center){Icon(if(p.paused)Icons.Default.Pause else Icons.Default.FolderOpen,null,tint=if(p.paused)Neo.Ink else MaterialTheme.colorScheme.onSurface)}
+     Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(8.dp)) {
+      Text(p.title,style=MaterialTheme.typography.titleLarge)
+      Text(p.nextStep.ifBlank{tr(R.string.ux_choose_a_project_step_70297)},style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant,maxLines=2,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+      Text("\u2066$done / ${steps.size}\u2069 · "+tr(R.string.ux_steps_completed_880fd),style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+      LinearProgressIndicator(progress={if(steps.isEmpty())0f else done.toFloat()/steps.size},modifier=Modifier.fillMaxWidth().height(7.dp),color=if(p.paused)Neo.Purple else if(androidx.compose.foundation.isSystemInDarkTheme())Neo.Lime else Neo.Ink,trackColor=MaterialTheme.colorScheme.surfaceVariant)
      }
-     Text(p.title,style=MaterialTheme.typography.headlineMedium)
-     if(p.description.isNotBlank())Text(p.description,style=MaterialTheme.typography.bodyMedium)
-     HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
-     Eyebrow(tr(R.string.next_action))
-     Text(p.nextStep.ifBlank{tr(R.string.ux_choose_a_project_step_70297)},style=MaterialTheme.typography.titleMedium)
-     Text(dateText(p.updated),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
     }
+    HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
    }
   }
  }
@@ -107,27 +110,44 @@ import java.time.*
  val returned=history.zipWithNext().any{(a,b)->a.created>=week && a.created-b.created>=7*86_400_000L}
  var all by rememberSaveable{mutableStateOf(false)}
  val visible=if(all)history else recent
- LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(24.dp,20.dp,24.dp,110.dp),verticalArrangement=Arrangement.spacedBy(22.dp)) {
-  item {Eyebrow(tr(R.string.progress))}
-  item {Text(tr(R.string.v3_trail_title),style=MaterialTheme.typography.displaySmall)}
-  item {Trail(recent.count{it.kind in setOf("advanced","completed","milestone")})}
+ LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(24.dp,20.dp,24.dp,32.dp),verticalArrangement=Arrangement.spacedBy(16.dp)) {
+  item {Column{Text(tr(R.string.neo_progress_heading),style=MaterialTheme.typography.displaySmall);InkUnderline()}}
+  item {Text(if(returned)tr(R.string.ux_you_came_back_continue_from_here_2d8dd) else tr(R.string.neo_small_steps),color=MaterialTheme.colorScheme.onSurfaceVariant)}
+  item {Choices(listOf("week" to tr(R.string.v3_this_week),"all" to tr(R.string.history)),if(all)"all" else "week"){all=it=="all"}}
   item {
-   Text(if(returned)tr(R.string.ux_you_came_back_continue_from_here_2d8dd) else tr(R.string.v3_trail_reflection),style=MaterialTheme.typography.bodyLarge)
-   Spacer(Modifier.height(12.dp))
-   val done=recent.count{it.kind=="completed"}
-   val steps=recent.count{it.kind=="advanced"}
-   Text(tr(R.string.v3_this_week)+" · "+tr(R.string.v3_completed_short)+": "+done+" · "+tr(R.string.v3_progress_short)+": "+steps,style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
+   val metrics=listOf(Triple(tr(R.string.neo_starts),visible.count{it.kind=="started"},Neo.Lime),Triple(tr(R.string.neo_advances),visible.count{it.kind=="advanced"},Neo.Purple),Triple(tr(R.string.neo_completions),visible.count{it.kind=="completed"},MaterialTheme.colorScheme.surfaceVariant))
+   if(androidx.compose.ui.platform.LocalConfiguration.current.fontScale>1.2f)Column(verticalArrangement=Arrangement.spacedBy(12.dp)){metrics.forEach{(label,count,color)->MovementStat(label,count,color,Modifier.fillMaxWidth())}}
+   else Row(Modifier.height(IntrinsicSize.Min),horizontalArrangement=Arrangement.spacedBy(10.dp)){metrics.forEach{(label,count,color)->MovementStat(label,count,color,Modifier.weight(1f).fillMaxHeight())}}
   }
-  item {Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)){
-   FilterChip(!all,{all=false},label={Text(tr(R.string.v3_this_week))})
-   FilterChip(all,{all=true},label={Text(tr(R.string.history))})
-  }}
+  item {ActivityBars(history)}
+  item {HorizontalDivider();Spacer(Modifier.height(12.dp));Eyebrow(tr(R.string.history))}
   if(visible.isEmpty())item {Text(tr(R.string.no_progress));Text(tr(R.string.v3_no_history),color=MaterialTheme.colorScheme.onSurfaceVariant)}
-  items(visible,key={it.id}){e->
-   Column {
-    if(e.kind=="started" && tasks.any{it.id==e.taskId && e.created-it.created>=7*86_400_000L})Eyebrow(tr(R.string.ux_what_waited_is_moving_5b64b))
-    TimelineEntry(e)
-   }
+  items(visible,key={it.id}){e->Column{if(e.kind=="started" && tasks.any{it.id==e.taskId && e.created-it.created>=7*86_400_000L})Eyebrow(tr(R.string.ux_what_waited_is_moving_5b64b));TimelineEntry(e)}}
+ }
+}
+@Composable fun MovementStat(label:String,count:Int,color:androidx.compose.ui.graphics.Color,modifier:Modifier=Modifier) {
+ val on=if(color==Neo.Lime || color==Neo.Purple)Neo.Ink else MaterialTheme.colorScheme.onSurface
+ Column(modifier.background(color,RoundedCornerShape(16.dp)).padding(horizontal=14.dp,vertical=20.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
+  Text(count.toString(),style=MaterialTheme.typography.displaySmall,color=on)
+  Text(label,style=MaterialTheme.typography.labelMedium,color=on)
+ }
+}
+@Composable fun ActivityBars(history:List<Event>) {
+ val days=(6 downTo 0).map{LocalDate.now().minusDays(it.toLong())}
+ val counts=days.map{day->history.count{Instant.ofEpochMilli(it.created).atZone(ZoneId.systemDefault()).toLocalDate()==day}}
+ val peak=counts.maxOrNull()?.coerceAtLeast(1)?:1
+ val actionLabel=tr(R.string.neo_activity_desc)
+ val locale=java.util.Locale.forLanguageTag(if(LocalEnglish.current)"en" else "he")
+ Column(verticalArrangement=Arrangement.spacedBy(16.dp)) {
+  Text(tr(R.string.neo_activity),style=MaterialTheme.typography.titleMedium)
+  Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp),verticalAlignment=Alignment.Bottom) {
+   days.forEachIndexed{i,day->Column(Modifier.weight(1f).clearAndSetSemantics{contentDescription=day.toString()+": "+counts[i]+" "+actionLabel},horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(8.dp)) {
+    Box(Modifier.height(76.dp).fillMaxWidth(),contentAlignment=Alignment.BottomCenter){
+     Box(Modifier.width(16.dp).height(if(counts[i]==0)3.dp else (76f*counts[i]/peak).dp).background(if(counts[i]==0)MaterialTheme.colorScheme.outlineVariant else Neo.Purple,RoundedCornerShape(3.dp)))
+    }
+    Text(day.dayOfWeek.getDisplayName(java.time.format.TextStyle.NARROW,locale),style=MaterialTheme.typography.labelSmall)
+    Text(counts[i].toString(),style=MaterialTheme.typography.labelSmall)
+   }}
   }
  }
 }
@@ -136,5 +156,5 @@ import java.time.*
  var entered by remember{mutableStateOf(false)}
  LaunchedEffect(Unit){entered=true}
  val scale by androidx.compose.animation.core.animateFloatAsState(if(entered)1f else .88f,if(reduced)androidx.compose.animation.core.snap() else androidx.compose.animation.core.spring(dampingRatio=.7f),label="milestone arrival")
- AlertDialog(onDismissRequest=onDismiss,icon={Icon(Icons.Default.Flag,null,Modifier.size(42.dp).graphicsLayer{scaleX=scale;scaleY=scale},tint=MaterialTheme.colorScheme.primary)},title={Text(tr(R.string.v3_milestone_title))},text={Column{Trail(1);Text(tr(R.string.v3_milestone_body))}},confirmButton={TextButton(onDismiss){Text(tr(R.string.v3_continue))}})
+ AlertDialog(onDismissRequest=onDismiss,icon={Icon(Icons.Default.Flag,null,Modifier.size(42.dp).graphicsLayer{scaleX=scale;scaleY=scale},tint=Neo.Ink)},containerColor=Neo.Purple,titleContentColor=Neo.Ink,textContentColor=Neo.Ink,title={Text(tr(R.string.v3_milestone_title))},text={Column{Trail(1);Text(tr(R.string.v3_milestone_body))}},confirmButton={TextButton(onDismiss){Text(tr(R.string.v3_continue),color=Neo.Ink)}})
 }

@@ -1,5 +1,11 @@
 # Development
 
+## 4.0 UI architecture
+
+`DesignSystem.kt` owns the semantic palette, bundled Heebo typography and custom pressable/segmented controls. `NowScreen.kt`, `FocusScreen.kt`, `JourneyScreens.kt` and `RecoveryMoment.kt` implement the new primary experiences. Storage schemas remain unchanged. See [visual specification](V4_VISUAL_SPEC.md) and [device verification](V4_QA_REPORT.md).
+
+`NeoDeviceTest` covers recovery timer exclusion and Now waiting blockers. Progress tests scroll to history entries by stable event key because the seven-day chart precedes the history.
+
 ## Structure
 
 - `Data.kt`: entities, additive Room migrations, repository and preferences.

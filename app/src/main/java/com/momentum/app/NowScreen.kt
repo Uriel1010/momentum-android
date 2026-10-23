@@ -44,49 +44,41 @@ import java.time.LocalTime
   Text(tr(R.string.local_only),color=MaterialTheme.colorScheme.onSurfaceVariant)
  }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable fun NowScreen(vm:MomentumViewModel,tasks:List<Task>,projects:List<Project>,prefs:Prefs,onStart:(Task)->Unit,onBrowse:()->Unit,onCapture:(String)->Unit,onLater:(Task)->Unit,onQuickCapture:()->Unit,onProject:(Project)->Unit) {
  var minutes by rememberSaveable {mutableIntStateOf(0)}
  var easy by rememberSaveable {mutableStateOf(false)}
  var selectedContext by rememberSaveable {mutableStateOf("")}
  var showConditions by rememberSaveable {mutableStateOf(false)}
  var now by remember {mutableLongStateOf(System.currentTimeMillis())}
+ var stuck by remember {mutableStateOf<Task?>(null)}
+ var note by rememberSaveable {mutableStateOf("")}
  val events by vm.events.collectAsStateWithLifecycle()
  LaunchedEffect(Unit){while(true){delay(15_000);now=System.currentTimeMillis()}}
  val candidates=remember(tasks,projects,minutes,easy,selectedContext,now,events){NowPolicy.candidates(tasks,projects,now,minutes,easy,selectedContext,events)}
- val suggestion=candidates.firstOrNull()
- LaunchedEffect(suggestion?.task?.id,prefs.suggestions) {if(prefs.suggestions)suggestion?.let {vm.repo.analytics.record("recommended",it.task.id)}}
- val hour=LocalTime.now().hour
- Page(spacing=12.dp) {
-  Text(tr(R.string.ux_start_with_something_small_e3a7a),style=MaterialTheme.typography.headlineMedium)
-  val resume=ResumePolicy.latest(tasks,projects,events,now)
-  if(resume!=null)ResumeCard(resume){onStart(resume.task)}
-  Choices(listOf(0,2,5,15,30).map{it.toString() to if(it==0)tr(R.string.ux_your_pace_79575) else "$it ${tr(R.string.minutes)}"},minutes.toString(),{minutes=it.toInt()})
-  AnimatedContent(targetState=if(prefs.suggestions)suggestion?.task?.id else null,label="next step",transitionSpec={if(prefs.reducedMotion)EnterTransition.None togetherWith ExitTransition.None else fadeIn() togetherWith fadeOut()}) {id->
-   val s=candidates.find{it.task.id==id}
-   if(s!=null) {
-    val t=s.task
-    Surface(color=MaterialTheme.colorScheme.background) {
-     Column(Modifier.fillMaxWidth().padding(vertical=8.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-      Trail(events.count{it.kind in setOf("completed","advanced","milestone")})
-      Text(t.title,style=MaterialTheme.typography.displaySmall)
-      val meta=listOfNotNull(t.estimate?.let{"$it ${tr(R.string.minutes)}"},t.contexts.takeIf{it.isNotBlank()},projects.find{it.id==t.projectId}?.title)
-      if(meta.isNotEmpty())Text(meta.joinToString("  ·  "),style=MaterialTheme.typography.labelLarge)
-      Text(when {
-       events.count{it.taskId==t.id && it.kind=="postponed"}>=3->tr(R.string.ux_this_has_waited_a_few_times_just_the_f_307f9)
-       "priority" in s.reasons->tr(R.string.reason_priority)
-       "fits" in s.reasons->tr(R.string.reason_fits)
-       "due" in s.reasons->tr(R.string.reason_due)
-       else->tr(R.string.ux_start_without_committing_to_finish_2562a)
-      },style=MaterialTheme.typography.bodyMedium)
-      PrimaryAction(tr(R.string.start),{onStart(t)})
-      Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
-       TextButton({vm.defer(t,false);now=System.currentTimeMillis()}){Text(tr(R.string.other))}
-       TextButton({onLater(t);now=System.currentTimeMillis()}){Text(tr(R.string.later))}
-      }
-     }
+ val suggestion=if(prefs.suggestions)candidates.firstOrNull() else null
+ val resume=ResumePolicy.latest(tasks,projects,events,now)
+ LaunchedEffect(suggestion?.task?.id){suggestion?.let{vm.repo.analytics.record("recommended",it.task.id)}}
+ Page(spacing=18.dp) {
+  Column {Text(tr(R.string.neo_now_heading),style=MaterialTheme.typography.displaySmall);InkUnderline()}
+  Text(tr(R.string.neo_now_body),color=MaterialTheme.colorScheme.onSurfaceVariant)
+  AnimatedContent(targetState=suggestion?.task?.id,label="next invitation",transitionSpec={if(prefs.reducedMotion)EnterTransition.None togetherWith ExitTransition.None else fadeIn() togetherWith fadeOut()}) {id->
+   val t=candidates.find{it.task.id==id}?.task
+   if(t!=null)ActionPanel {
+    Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
+     Text(tr(R.string.neo_next_small),style=MaterialTheme.typography.labelMedium,modifier=Modifier.weight(1f))
+     Icon(Icons.Default.NorthEast,null,Modifier.size(24.dp))
     }
+    Text(t.title,style=MaterialTheme.typography.headlineLarge)
+    Text(t.nextAction.ifBlank{tr(R.string.ux_start_without_committing_to_finish_2562a)},style=MaterialTheme.typography.bodyMedium)
+    Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+     Icon(Icons.Default.Schedule,null,Modifier.size(18.dp))
+     Text(t.estimate?.let{"$it "+tr(R.string.minutes)}?:tr(R.string.ux_your_pace_79575),style=MaterialTheme.typography.labelMedium)
+     projects.find{it.id==t.projectId}?.let{Text("· "+it.title,Modifier.weight(1f),style=MaterialTheme.typography.labelMedium,maxLines=2,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)}
+    }
+    if(events.count{it.taskId==t.id && it.kind=="postponed"}>=3)Text(tr(R.string.ux_this_has_waited_a_few_times_just_the_f_307f9),style=MaterialTheme.typography.bodySmall)
+    PrimaryAction(tr(R.string.start),{onStart(t)},ink=true)
    } else QuietPanel {
-    Icon(Icons.Default.CheckCircleOutline,null,Modifier.size(36.dp),tint=MaterialTheme.colorScheme.primary)
     Text(when {
      tasks.isEmpty()->tr(R.string.ux_a_little_room_in_your_mind_806b8)
      tasks.all{it.status in setOf("DONE","ARCHIVED")}->tr(R.string.ux_what_was_here_is_behind_you_cf4a3)
@@ -102,21 +94,27 @@ import java.time.LocalTime
     })
    }
   }
-  Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-   FilterChip(easy,{easy=!easy},label={Text(tr(R.string.ux_something_easier_2fe57))})
-   FilterChip(minutes==5,{minutes=if(minutes==5)0 else 5},label={Text(tr(R.string.ux_something_shorter_f310e))})
-  }
-  Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
-   TextButton(onBrowse){Text(tr(R.string.ux_browse_tasks_a1a73))}
-   TextButton({showConditions=!showConditions}){Text(tr(R.string.conditions))}
-  }
-  AnimatedVisibility(showConditions) {Column {OutlinedTextField(selectedContext,{selectedContext=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.context))});Text(tr(R.string.no_geo),style=MaterialTheme.typography.bodySmall)}}
+  suggestion?.task?.let{t->Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
+   TextButton({vm.defer(t,false);now=System.currentTimeMillis()}){Text(tr(R.string.other))}
+   TextButton({stuck=t;note=""}){Text(tr(R.string.stuck))}
+   TextButton({onLater(t);now=System.currentTimeMillis()}){Text(tr(R.string.later))}
+  }}
+  if(resume!=null)ResumeCard(resume){onStart(resume.task)}
+  Choices(listOf(0,2,5,15,30).map{it.toString() to if(it==0)tr(R.string.ux_your_pace_79575) else "$it ${tr(R.string.minutes)}"},minutes.toString(),{minutes=it.toInt()})
+  Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){TextButton({easy=!easy}){Text((if(easy)"✓ " else "")+tr(R.string.ux_something_easier_2fe57))};TextButton({showConditions=!showConditions}){Text(tr(R.string.conditions))}}
+  AnimatedVisibility(showConditions){OutlinedTextField(selectedContext,{selectedContext=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.context))})}
+  TextButton(onBrowse){Text(tr(R.string.ux_browse_tasks_a1a73))}
   val stale=projects.firstOrNull{!it.paused && now-it.updated>7*86_400_000L && tasks.any{t->t.projectId==it.id && t.status !in setOf("DONE","ARCHIVED")}}
-  if(stale!=null)QuietPanel {
-   Eyebrow(tr(R.string.ux_pick_up_the_thread_fd538))
-   Text(stale.title,style=MaterialTheme.typography.titleMedium)
-   Text(stale.nextStep.ifBlank{stale.summary})
-   TextButton({onProject(stale)}){Text(tr(R.string.ux_find_a_project_step_c0b7a))}
-  }
+  if(stale!=null)QuietPanel {Eyebrow(tr(R.string.ux_pick_up_the_thread_fd538));Text(stale.title,style=MaterialTheme.typography.titleMedium);Text(stale.nextStep.ifBlank{stale.summary});TextButton({onProject(stale)}){Text(tr(R.string.ux_find_a_project_step_c0b7a))}}
  }
+ stuck?.let{t->ModalBottomSheet(onDismissRequest={stuck=null},sheetState=rememberModalBottomSheetState(skipPartiallyExpanded=true)){
+  Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).imePadding().padding(24.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
+   Heading(tr(R.string.ux_what_would_help_now_9c0e0))
+   Text(tr(R.string.ux_change_the_step_not_the_goal_cb524))
+   OutlinedTextField(note,{note=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.v3_blocker_note))})
+   PrimaryAction(tr(R.string.ux_define_a_small_step_80d1e),{stuck=null;onStart(t)})
+   TextButton({vm.work{vm.repo.block(t,"time",note)};stuck=null}){Text(tr(R.string.no_time))}
+   TextButton({vm.work{vm.repo.block(t,"waiting",note)};stuck=null}){Text(tr(R.string.waiting_for))}
+  }
+ }}
 }
