@@ -11,6 +11,9 @@
   <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
   <meta-data android:name="android.appwidget.provider" android:resource="@xml/momentum_widget"/>
  </receiver>
+ <receiver android:name=".TodoListWidget" android:exported="false" android:label="@string/todo_widget_wide"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/todo_widget_wide"/></receiver>
+ <receiver android:name=".TallTodoListWidget" android:exported="false" android:label="@string/todo_widget_tall"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/todo_widget_tall"/></receiver>
+ <service android:name=".TodoListService" android:exported="false" android:permission="android.permission.BIND_REMOTEVIEWS"/>
  <receiver android:name=".CaptureWidget" android:exported="false" android:label="@string/capture_widget_name">
   <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
   <meta-data android:name="android.appwidget.provider" android:resource="@xml/capture_widget"/>

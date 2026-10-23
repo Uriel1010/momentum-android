@@ -5,7 +5,7 @@
 
 <p align="center"><a href="https://github.com/Uriel1010/momentum-android/releases/latest"><strong>Download for Android</strong></a> &nbsp; · &nbsp; <a href="https://github.com/Uriel1010/momentum-android/stargazers">★ Star Momentum</a> &nbsp; · &nbsp; <a href="https://github.com/Uriel1010/momentum-android/issues/new/choose">Suggest an improvement</a></p>
 
-<p align="center"><strong>Offline · No account · No ads · Hebrew + English · Android 10+</strong></p>
+<p align="center"><strong>Offline · No account · No ads · Android 10+</strong></p>
 
 A thought arrives while you are doing something else. You unlock your phone, get distracted, and lose the thread.
 
@@ -24,25 +24,21 @@ Momentum gives you a place to catch that thought—and a clear way back. Its hom
 
 ## A little more character. A little less friction.
 
-Heavy Hebrew and English typography. Electric lime actions. Warm white and charcoal canvases. Lavender for a pause or a small celebration.
+Bold editorial typography. Electric lime actions. Warm white and charcoal canvases. Lavender for a pause or a small celebration.
 
 These are real Android app captures with synthetic example content. Light theme above, dark below; Focus stays charcoal in both.
 
-![Momentum: Now, Focus, Projects and Progress](docs/images/momentum-4.0-grid.png)
+![Momentum: Now, Focus, Projects and Progress](docs/images/momentum-4.0-english-grid.png)
 
-<details><summary><strong>See the English interface</strong></summary>
+## New in 4.2: your list, at a glance
 
-![English light and dark screens](docs/images/momentum-4.0-english-grid.png)
+![English to-do list widgets in wide and tall layouts](docs/images/momentum-4.2-widgets.png)
 
-</details>
+**Two shapes, one useful list.** Add **To-dos · 4×2** or **To-dos · 2×4** from your launcher’s widget picker, or use the matching buttons in Settings. Resize either preset to fit your home screen. Scroll unfinished tasks, tap a row to open its details, tap the heading for the full list, or tap + to capture a thought.
 
-<details><summary><strong>See recovery, blockers and celebrations</strong></summary>
+Active tasks come first. Waiting, scheduled and paused-project tasks remain visible with status labels. Finished tasks disappear. The widget displays up to 100 tasks plus a link to the full list; placement and dimensions depend on your launcher.
 
-![Recovery and interaction screens](docs/images/momentum-4.0-moments.png)
-
-</details>
-
-## New in 4.1: keep the thought, keep the task
+## Keep the thought, keep the task
 
 ![One-cell capture widget and silent task notification](docs/images/momentum-4.1-features.png)
 
@@ -60,7 +56,7 @@ Notification permission is required. Android controls lock-screen visibility and
 - Projects with next steps, summaries, milestones and real completion counts.
 - Activity history with real starts, advances and completions. No streak penalties.
 - Gentle scheduled reminders with quiet hours and limits.
-- Hebrew RTL, English LTR, light/dark themes, large text and reduced motion.
+- Light/dark themes, large text and reduced motion.
 - Manual JSON backup and restore.
 
 ## Your ideas can shape Momentum
@@ -77,8 +73,8 @@ Download the APK from the [latest release](https://github.com/Uriel1010/momentum
 
 | Download | Choose this when… |
 | --- | --- |
-| **`momentum-4.1.1-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
-| `momentum-4.1.1-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
+| **`momentum-4.2-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
+| `momentum-4.2-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
 | `SHA256SUMS.txt` | You want to verify download integrity. |
 
 Existing users can install the main release over the previous official version. Do not uninstall to work around a signing mismatch; make a backup first and check the signing identity. The optional QA APK is not needed for normal use.
@@ -101,8 +97,8 @@ chmod +x gradlew
 ./gradlew -PmomentumQa=true assembleDebug assembleDebugAndroidTest
 ```
 
-**Validation:** 41 JVM tests and 62 device test executions passed; release lint has zero errors. Tested on one physical Android 16 device. Broader launcher and human accessibility review remain outstanding.
+**Validation:** 43 JVM tests and 14 focused device tests passed for 4.2; release lint has zero errors. The preceding 4.1 release also passed 62 device test executions. Tested on one physical Android 16 device. Broader launcher and human accessibility review remain outstanding.
 
-Release signing keys are not included. Copy build outputs before switching main/QA mode. [Developer guide](docs/DEVELOPMENT.md) · [Design system](docs/V4_VISUAL_SPEC.md) · [4.1 verification](docs/V41_QA_REPORT.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+Release signing keys are not included. Copy build outputs before switching main/QA mode. [Developer guide](docs/DEVELOPMENT.md) · [Design system](docs/V4_VISUAL_SPEC.md) · [4.2 verification](docs/V42_QA_REPORT.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 Built for small, real actions. Improved with your feedback.

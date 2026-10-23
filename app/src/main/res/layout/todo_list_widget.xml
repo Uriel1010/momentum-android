@@ -1,0 +1,10 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/todo_widget_root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="8dp" android:background="@drawable/widget_background">
+ <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+  <TextView android:id="@+id/todo_widget_heading" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center_vertical" android:paddingHorizontal="4dp" android:textSize="15sp" android:textStyle="bold" android:textColor="#D7FF3F" android:maxLines="1" android:ellipsize="end" android:clickable="true" android:focusable="true"/>
+  <ImageButton android:id="@+id/todo_widget_capture" android:layout_width="48dp" android:layout_height="48dp" android:padding="13dp" android:src="@drawable/ic_capture_thought" android:background="@drawable/capture_widget_background" android:contentDescription="@string/capture"/>
+ </LinearLayout>
+ <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+  <ListView android:id="@+id/todo_widget_list" android:layout_width="match_parent" android:layout_height="match_parent" android:divider="#343437" android:dividerHeight="1dp" android:scrollbars="vertical"/>
+  <TextView android:id="@+id/todo_widget_empty" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:textSize="14sp" android:textColor="#C7C5C2" android:text="@string/todo_widget_empty"/>
+ </FrameLayout>
+</LinearLayout>

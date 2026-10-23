@@ -53,6 +53,13 @@ import kotlinx.coroutines.flow.first
    if(manager.isRequestPinAppWidgetSupported)manager.requestPinAppWidget(android.content.ComponentName(widgetContext,CaptureWidget::class.java),null,null)
    else android.widget.Toast.makeText(widgetContext,widgetContext.getString(R.string.widget_help),android.widget.Toast.LENGTH_LONG).show()
   },Modifier.fillMaxWidth()){Text(tr(R.string.capture_widget_add))}
+  listOf(TodoListWidget::class.java to R.string.todo_widget_add_wide,TallTodoListWidget::class.java to R.string.todo_widget_add_tall).forEach{(provider,label)->
+   OutlinedButton({
+    val manager=android.appwidget.AppWidgetManager.getInstance(widgetContext)
+    if(manager.isRequestPinAppWidgetSupported)manager.requestPinAppWidget(android.content.ComponentName(widgetContext,provider),null,null)
+    else android.widget.Toast.makeText(widgetContext,widgetContext.getString(R.string.widget_help),android.widget.Toast.LENGTH_LONG).show()
+   },Modifier.fillMaxWidth()){Text(tr(label))}
+  }
   Eyebrow(tr(R.string.ux_experience_5b5aa))
   Toggle(tr(R.string.language),p.english){vm.pref("english",it)}
   Toggle(tr(R.string.recommendations),p.suggestions){vm.pref("suggestions",it)}

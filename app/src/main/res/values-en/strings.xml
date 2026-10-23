@@ -256,4 +256,18 @@
  <string name="focus_notification_hint">One silent reminder, until you finish or remove it.</string>
  <string name="focus_notification_permission">Allow notifications in phone settings to keep this task visible.</string>
  <string name="focus_notification_settings">Phone notification settings</string>
+ <string name="todo_widget_wide">To-dos · 4×2</string>
+ <string name="todo_widget_tall">To-dos · 2×4</string>
+ <string name="todo_widget_description">A resizable, scrollable list of unfinished tasks</string>
+ <string name="todo_widget_add_wide">Add to-do list 4×2</string>
+ <string name="todo_widget_add_tall">Add to-do list 2×4</string>
+ <string name="todo_widget_heading">To-dos · %1$d</string>
+ <string name="todo_widget_all">All to-dos · %1$d</string>
+ <string name="todo_widget_empty">No unfinished tasks. Capture a new thought.</string>
+ <string name="todo_widget_more">Open the full list</string>
+ <string name="todo_widget_scheduled">Scheduled for later</string>
+ <string name="todo_widget_in_progress">In progress</string>
+ <string name="todo_example_0">Write one paragraph</string>
+ <string name="todo_example_1">Plan the next step</string>
+ <string name="todo_example_2">Open the notebook</string>
 </resources>

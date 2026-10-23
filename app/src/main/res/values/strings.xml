@@ -256,4 +256,18 @@
  <string name="focus_notification_hint">תזכורת שקטה למשימה אחת, עד שמסיימים או מסירים.</string>
  <string name="focus_notification_permission">כדי להציג את המשימה, יש לאפשר התראות בהגדרות הטלפון.</string>
  <string name="focus_notification_settings">הגדרות התראות בטלפון</string>
+ <string name="todo_widget_wide">משימות · 4×2</string>
+ <string name="todo_widget_tall">משימות · 2×4</string>
+ <string name="todo_widget_description">רשימת משימות פתוחות לגלילה ושינוי גודל</string>
+ <string name="todo_widget_add_wide">להוסיף רשימת משימות 4×2</string>
+ <string name="todo_widget_add_tall">להוסיף רשימת משימות 2×4</string>
+ <string name="todo_widget_heading">משימות · %1$d</string>
+ <string name="todo_widget_all">כל המשימות · %1$d</string>
+ <string name="todo_widget_empty">אין משימות פתוחות. אפשר לתפוס מחשבה חדשה.</string>
+ <string name="todo_widget_more">לפתוח את הרשימה המלאה</string>
+ <string name="todo_widget_scheduled">מתוכנן להמשך</string>
+ <string name="todo_widget_in_progress">באמצע העבודה</string>
+ <string name="todo_example_0">לכתוב פסקה אחת</string>
+ <string name="todo_example_1">לתכנן את הצעד הבא</string>
+ <string name="todo_example_2">לפתוח את המחברת</string>
 </resources>

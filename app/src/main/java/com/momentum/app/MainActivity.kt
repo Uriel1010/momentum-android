@@ -119,7 +119,13 @@ val LocalEnglish=staticCompositionLocalOf {false}
  LaunchedEffect(vm) {vm.messages.collect {message(it)}}
  LaunchedEffect(captureRequested,loaded,prefs.onboarded){if(captureRequested && loaded && prefs.onboarded){initialText="";newTask=true;consumeCapture()}}
  LaunchedEffect(shared) {if(shared.isNotBlank()){initialText=shared;newTask=true;consumeShare()}}
- LaunchedEffect(focusId,loaded) {if(loaded && focusId!=null) {nav.navigate(if(focusId.startsWith("project:"))"project/"+focusId.removePrefix("project:") else "focus/$focusId");consumeFocus()}}
+ LaunchedEffect(focusId,loaded) {if(loaded && focusId!=null) {
+  when {
+   focusId=="list:tasks"->nav.navigate("tasks"){launchSingleTop=true}
+   focusId.startsWith("task:")-> {val id=focusId.removePrefix("task:");if(vm.repo.dao.task(id)!=null)editorId=id}
+   else->nav.navigate(if(focusId.startsWith("project:"))"project/"+focusId.removePrefix("project:") else "focus/$focusId")
+  };consumeFocus()
+ }}
  val export=rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) {uri->
   if(uri!=null)vm.work {
    val data=withContext(Dispatchers.IO){Backup.export(vm.repo)}
