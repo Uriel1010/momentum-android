@@ -35,7 +35,7 @@ class Momentum41DeviceTest {
  }
  @Test fun compactWidgetCapturesAtOneCell(){
   val provider=AppWidgetManager.getInstance(app).installedProviders.single{it.provider==ComponentName(app,CaptureWidget::class.java)}
-  assertEquals(1,provider.targetCellWidth);assertEquals(1,provider.targetCellHeight)
+  assertEquals(R.layout.capture_widget,provider.previewLayout);assertEquals(R.drawable.capture_widget_preview,provider.previewImage);assertNotNull(provider.loadPreviewImage(app,0));assertEquals(1,provider.targetCellWidth);assertEquals(1,provider.targetCellHeight)
   val views=runBlocking{CaptureWidget.views(app)}
   compose.runOnUiThread{
    val view=shot(views,"v41-widget.png",64,64)

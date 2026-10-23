@@ -46,7 +46,7 @@ These are real Android app captures with synthetic example content. Light theme 
 
 ![One-cell capture widget and silent task notification](docs/images/momentum-4.1-features.png)
 
-**A tiny capture widget.** Add the new 1×1 widget from Settings → Add 1×1 thought widget, then confirm placement in your launcher. One tap opens the capture sheet with the keyboard ready. The larger next-action widget is still available.
+**A tiny capture widget.** Add the new 1×1 widget from Settings → Add 1×1 thought widget, then confirm placement in your launcher. One tap opens the capture sheet with the keyboard ready. The larger next-action widget is still available. Version 4.1.1 includes both a launcher preview layout and a static preview image for launcher compatibility.
 
 **Your current assignment, quietly visible.** Open a task in Focus and choose Keep in notifications. Its title and next action stay in a silent notification. Tap to return, or choose Remove from notifications. One assignment is pinned at a time; finishing, postponing, blocking, deleting the task, or pausing its project clears it. Removing the notification does not complete the task.
 
@@ -77,8 +77,8 @@ Download the APK from the [latest release](https://github.com/Uriel1010/momentum
 
 | Download | Choose this when… |
 | --- | --- |
-| **`momentum-4.1-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
-| `momentum-4.1-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
+| **`momentum-4.1.1-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
+| `momentum-4.1.1-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
 | `SHA256SUMS.txt` | You want to verify download integrity. |
 
 Existing users can install the main release over the previous official version. Do not uninstall to work around a signing mismatch; make a backup first and check the signing identity. The optional QA APK is not needed for normal use.
