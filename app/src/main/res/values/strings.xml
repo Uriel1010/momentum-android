@@ -270,4 +270,18 @@
  <string name="todo_example_0">לכתוב פסקה אחת</string>
  <string name="todo_example_1">לתכנן את הצעד הבא</string>
  <string name="todo_example_2">לפתוח את המחברת</string>
+ <string name="state_todo">לביצוע</string>
+ <string name="state_unfinished">טרם הושלם</string>
+ <string name="state_reopen">סימון כלא הושלם</string>
+ <string name="state_restore">החזרה לביצוע</string>
+ <string name="state_reopened">הועבר לביצוע. אפשר למצוא ברשימת טרם הושלם.</string>
+ <string name="state_places">כאן נמצאות כל המשימות. פרויקטים מקבצים משימות קשורות. עכשיו מציע את הצעד הבא.</string>
+ <string name="state_help_todo">עוד לא התחלת. רעיונות שנשמרו ומשימות מוכנות מופיעים כאן יחד.</string>
+ <string name="state_help_doing">התחלת, אבל עוד לא סיימת. אפשר לחזור למשימות האלה בכל רגע.</string>
+ <string name="state_help_waiting">ממתין למישהו או למשהו. כשאפשר להמשיך, מעבירים לביצוע.</string>
+ <string name="state_help_done">משימות שסיימת. סימון כלא הושלם מחזיר אותן לביצוע.</string>
+ <string name="state_help_archived">הונחו בצד, לא נמחקו ולא נספרות כהושלמו. אפשר להחזיר לביצוע בכל עת.</string>
+ <string name="state_help_unfinished">כל מה שעוד נותר: לביצוע, בתהליך ובהמתנה. כולל משימות שתוזמנו למועד מאוחר יותר.</string>
+ <string name="state_help_scheduled">סינון לפי זמן, לא מצב: משימות שטרם הושלמו ויש להן תזכורת או מועד התחלה מאוחר.</string>
+ <string name="state_help_all">כל המשימות, כולל משימות שהושלמו או הועברו לארכיון.</string>
 </resources>

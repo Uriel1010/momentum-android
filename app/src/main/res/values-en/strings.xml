@@ -270,4 +270,18 @@
  <string name="todo_example_0">Write one paragraph</string>
  <string name="todo_example_1">Plan the next step</string>
  <string name="todo_example_2">Open the notebook</string>
+ <string name="state_todo">To do</string>
+ <string name="state_unfinished">Unfinished</string>
+ <string name="state_reopen">Mark as not completed</string>
+ <string name="state_restore">Move back to To do</string>
+ <string name="state_reopened">Moved to To do. Find it under Unfinished.</string>
+ <string name="state_places">Tasks holds every task. Projects group related tasks. Now suggests one next step.</string>
+ <string name="state_help_todo">Not started yet. Captured ideas and ready tasks live here together.</string>
+ <string name="state_help_doing">Started, but not finished. You can return to these tasks at any time.</string>
+ <string name="state_help_waiting">Blocked by someone or something. Move to To do when you can continue.</string>
+ <string name="state_help_done">Finished tasks. Mark any task as not completed to bring it back to To do.</string>
+ <string name="state_help_archived">Set aside, not deleted or counted as completed. Move back to To do whenever needed.</string>
+ <string name="state_help_unfinished">Everything still to finish: To do, In progress and Waiting. Includes tasks scheduled for later.</string>
+ <string name="state_help_scheduled">A timing filter, not a status: unfinished tasks with a reminder or a later start date.</string>
+ <string name="state_help_all">Every task, including completed and archived tasks.</string>
 </resources>

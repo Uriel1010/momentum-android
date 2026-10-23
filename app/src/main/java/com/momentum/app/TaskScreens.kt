@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Dialog
@@ -22,7 +23,7 @@ import kotlinx.coroutines.*
 import java.util.Calendar
 
 fun statusLabel(status:String)=when(status) {
- "INBOX"->R.string.inbox;"READY"->R.string.ready;"IN_PROGRESS"->R.string.task_in_progress;"WAITING"->R.string.waiting;"DONE"->R.string.done;else->R.string.archived
+ "INBOX","READY"->R.string.state_todo;"IN_PROGRESS"->R.string.task_in_progress;"WAITING"->R.string.waiting;"DONE"->R.string.done;else->R.string.archived
 }
 @Composable fun DateField(label:String,value:Long?,onChange:(Long?)->Unit) {
  val context=LocalContext.current
@@ -49,7 +50,7 @@ fun statusLabel(status:String)=when(status) {
  var notes by rememberSaveable(old?.id){mutableStateOf(old?.notes?:"")}
  var estimate by rememberSaveable(old?.id){mutableStateOf(old?.estimate?.toString()?:"")}
  var priority by rememberSaveable(old?.id){mutableIntStateOf(old?.priority?:1)}
- var status by rememberSaveable(old?.id){mutableStateOf(old?.status?:"INBOX")}
+ var status by rememberSaveable(old?.id){mutableStateOf(TaskStates.visible(old?.status?:"READY"))}
  var project by rememberSaveable(old?.id){mutableStateOf(old?.projectId?:projectId?:"")}
  var next by rememberSaveable(old?.id){mutableStateOf(old?.nextAction?:"")}
  var contexts by rememberSaveable(old?.id){mutableStateOf(old?.contexts?:"")}
@@ -67,8 +68,12 @@ fun statusLabel(status:String)=when(status) {
   Button({
    val duration=estimate.toIntOrNull()
    if(title.isBlank() || (estimate.isNotBlank()&&(duration==null||duration !in 1..10080))){invalid=true}
-   else onSave((old?:Task(title=title)).copy(title=title,notes=notes,estimate=duration,priority=priority,status=status,projectId=project.takeIf{it.isNotBlank()},nextAction=next,contexts=contexts,due=due,reminder=reminder,available=available?:0,completed=if(status=="DONE")old?.completed?:System.currentTimeMillis() else null))
+   else onSave((old?:Task(title=title)).copy(title=title,notes=notes,estimate=duration,priority=priority,status=status,projectId=project.takeIf{it.isNotBlank()},nextAction=next,contexts=contexts,due=due,reminder=reminder,available=if(status=="READY" && old?.status in setOf("DONE","ARCHIVED","WAITING"))0 else available?:0,completed=if(status=="DONE")old?.completed?:System.currentTimeMillis() else null))
   },Modifier.fillMaxWidth().heightIn(min=52.dp)){Text(tr(R.string.save))}
+  Text(tr(R.string.status),style=MaterialTheme.typography.titleMedium)
+  StateChoices(listOf("READY","IN_PROGRESS","WAITING","DONE","ARCHIVED").map{it to tr(statusLabel(it))},status,{status=it})
+  Text(tr(stateHelp(status)),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+  if(old?.status in setOf("DONE","ARCHIVED"))OutlinedButton({onSave(TaskStates.reopened(requireNotNull(old)))},Modifier.fillMaxWidth().testTag("restoreTask")){Text(tr(if(old?.status=="DONE")R.string.state_reopen else R.string.state_restore))}
   TextButton({advanced=!advanced}){Text(tr(R.string.advanced))}
   if(advanced) {
    OutlinedTextField(notes,{notes=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.notes))})
@@ -76,8 +81,6 @@ fun statusLabel(status:String)=when(status) {
    OutlinedTextField(estimate,{estimate=it.filter(Char::isDigit).take(5)},Modifier.fillMaxWidth(),label={Text(tr(R.string.estimate))},keyboardOptions=androidx.compose.foundation.text.KeyboardOptions(keyboardType=androidx.compose.ui.text.input.KeyboardType.Number))
    Text(tr(R.string.priority))
    Choices(listOf("0" to tr(R.string.low),"1" to tr(R.string.normal),"2" to tr(R.string.high)),priority.toString(),{priority=it.toInt()})
-   Text(tr(R.string.status))
-   Choices(listOf("INBOX","READY","IN_PROGRESS","WAITING","DONE","ARCHIVED").map{it to tr(statusLabel(it))},status,{status=it})
    Text(tr(R.string.project))
    Choices(listOf("" to tr(R.string.none))+projects.map{it.id to it.title},project,{project=it})
    OutlinedTextField(contexts,{contexts=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.context))})

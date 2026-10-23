@@ -183,7 +183,7 @@ val LocalEnglish=staticCompositionLocalOf {false}
     val t=Task(title=value);vm.repo.save(t);vm.repo.metric("captured",t.id)
     scope.launch {if(snackbar.showSnackbar(savedLabel,undoLabel)==SnackbarResult.ActionPerformed)vm.work{vm.repo.delete(t)}}
    }},onQuickCapture={newTask=true;initialText="";taskProject=null},onProject={nav.navigate("project/"+it.id)},onLater={t->vm.work {vm.repo.postpone(t,3_600_000);if(snackbar.showSnackbar(context.getString(R.string.defer_hour),undoLabel)==SnackbarResult.ActionPerformed)vm.repo.undoPostpone(t)}}) }
-   composable("tasks") {TaskScreen(tasks,projects,onEdit=::edit,onStart={pulse(context,prefs.feedback,Touch.START);vm.work{vm.repo.start(it);nav.navigate("focus/${it.id}")}},onComplete={complete(it)})}
+   composable("tasks") {TaskScreen(tasks,projects,onEdit=::edit,onStart={pulse(context,prefs.feedback,Touch.START);vm.work{vm.repo.start(it);nav.navigate("focus/${it.id}")}},onComplete={complete(it)},onReopen={task->vm.work{vm.repo.dao.task(task.id)?.let{vm.repo.save(TaskStates.reopened(it))}};message(R.string.state_reopened)})}
    composable("focus/{id}") {entry->val task=tasks.find{it.id==entry.arguments?.getString("id")}
     if(task!=null)FocusScreen(vm,task,prefs,onComplete={complete(task){nav.popBackStack()}},onEdit={edit(task)},onExit={nav.popBackStack()})
    }
