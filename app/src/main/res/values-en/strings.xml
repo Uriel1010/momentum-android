@@ -284,4 +284,8 @@
  <string name="state_help_unfinished">Everything still to finish: To do, In progress and Waiting. Includes tasks scheduled for later.</string>
  <string name="state_help_scheduled">A timing filter, not a status: unfinished tasks with a reminder or a later start date.</string>
  <string name="state_help_all">Every task, including completed and archived tasks.</string>
+<string name="task_view">Show tasks</string>
+<string name="task_filters">Filters</string>
+<string name="task_clear_filters">Clear filters</string>
+<string name="task_show_results">Show results</string>
 </resources>

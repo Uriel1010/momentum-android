@@ -284,4 +284,8 @@
  <string name="state_help_unfinished">כל מה שעוד נותר: לביצוע, בתהליך ובהמתנה. כולל משימות שתוזמנו למועד מאוחר יותר.</string>
  <string name="state_help_scheduled">סינון לפי זמן, לא מצב: משימות שטרם הושלמו ויש להן תזכורת או מועד התחלה מאוחר.</string>
  <string name="state_help_all">כל המשימות, כולל משימות שהושלמו או הועברו לארכיון.</string>
+<string name="task_view">הצגת משימות</string>
+<string name="task_filters">סינון</string>
+<string name="task_clear_filters">ניקוי סינון</string>
+<string name="task_show_results">הצגת תוצאות</string>
 </resources>

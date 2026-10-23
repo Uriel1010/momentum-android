@@ -13,17 +13,17 @@ class TaskStatesDeviceTest {
  private fun open(id:String){
   compose.waitUntil(10000){compose.onAllNodesWithText("Tasks").fetchSemanticsNodes().isNotEmpty()}
   compose.onNodeWithText("Tasks").performClick()
-  if(id.startsWith("task:")){compose.onNodeWithText("Archive").performScrollTo().performClick();compose.onNodeWithTag("taskList").performScrollToNode(hasText("Bring this back"));compose.onNodeWithText("Bring this back").performClick()}
+  if(id.startsWith("task:")){compose.onNodeWithTag("taskStatePicker").performClick();compose.onNodeWithTag("taskStateList").performScrollToNode(hasText("Archive"));compose.onNodeWithText("Archive").performClick();compose.onNodeWithTag("taskList").performScrollToNode(hasText("Bring this back"));compose.onNodeWithText("Bring this back").performClick()}
  }
  @Test fun completedTaskCanBeReopenedFromList(){
   val task=Task(id="reopen-test",title="Reopen this task",notes="Keep my details",available=System.currentTimeMillis()+86400000)
   runBlocking{app.repo.save(task);app.repo.complete(task)};open("list:tasks")
-  compose.waitUntil(10000){compose.onAllNodesWithText("Completed").fetchSemanticsNodes().isNotEmpty()}
-  compose.onNodeWithText("Completed").performScrollTo().performClick()
+  compose.onNodeWithTag("taskStatePicker").performClick()
+  compose.onNodeWithTag("taskStateList").performScrollToNode(hasText("Completed"));compose.onNodeWithText("Completed").performClick()
   compose.onNodeWithTag("taskList").performScrollToNode(hasTestTag("reopen-reopen-test"));compose.onNodeWithTag("reopen-reopen-test").performClick()
   compose.waitUntil(10000){runBlocking{app.db.dao().task(task.id)?.status=="READY"}}
   runBlocking{val saved=app.db.dao().task(task.id)!!;assertNull(saved.completed);assertEquals(0L,saved.available);assertEquals(task.notes,saved.notes);assertFalse(app.db.dao().allEvents().any{it.taskId==task.id && it.kind=="completed"})}
-  compose.onNodeWithText("Unfinished",useUnmergedTree=true).performScrollTo().performClick()
+  compose.onNodeWithTag("taskStatePicker").performClick();compose.onNodeWithText("Unfinished",useUnmergedTree=true).performScrollTo().performClick()
   compose.onNodeWithText(task.title).assertExists()
  }
  @Test fun editorStatusIsVisibleWithoutAdvancedAndArchiveRestores(){
