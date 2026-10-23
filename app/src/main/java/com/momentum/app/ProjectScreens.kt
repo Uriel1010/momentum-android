@@ -42,6 +42,12 @@ import kotlinx.coroutines.flow.first
   Heading(tr(R.string.settings))
   FilledTonalButton(onSuggestions,Modifier.fillMaxWidth()){Icon(Icons.Default.Lightbulb,null);Spacer(Modifier.width(8.dp));Text(tr(R.string.dev_title))}
   Text(tr(R.string.ux_your_space_your_way_2dfe7),color=MaterialTheme.colorScheme.onSurfaceVariant)
+  val widgetContext=androidx.compose.ui.platform.LocalContext.current
+  OutlinedButton({
+   val manager=android.appwidget.AppWidgetManager.getInstance(widgetContext)
+   if(manager.isRequestPinAppWidgetSupported)manager.requestPinAppWidget(android.content.ComponentName(widgetContext,MomentumWidget::class.java),null,null)
+   else android.widget.Toast.makeText(widgetContext,widgetContext.getString(R.string.widget_help),android.widget.Toast.LENGTH_LONG).show()
+  },Modifier.fillMaxWidth()){Text(tr(R.string.widget_add))}
   Eyebrow(tr(R.string.ux_experience_5b5aa))
   Toggle(tr(R.string.language),p.english){vm.pref("english",it)}
   Toggle(tr(R.string.recommendations),p.suggestions){vm.pref("suggestions",it)}

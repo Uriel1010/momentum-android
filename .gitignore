@@ -17,3 +17,9 @@ dist/
 *.db-wal
 *.db-shm
 *.preferences_pb
+
+*.p12
+*.pk8
+*.idsig
+signing/
+*password*

@@ -1,9 +1,11 @@
 # Privacy
 
-Momentum works offline and does not request internet access. Tasks, projects, history, preferences, and development suggestions are stored on your device. There is no account registration, remote analytics, advertising SDK, or cloud service in this application.
+Momentum does not request internet access and has no account, remote analytics or cloud backend. Tasks, projects, activity, preferences and development suggestions stay on the device. Optional local metrics can be disabled and cleared.
 
-Optional local metrics can be turned off and cleared in Settings. Notification permission is used for reminders. Vibration supports optional feedback; boot completion reschedules reminders. Android cloud backup and automatic device transfer are disabled.
+User-selected suggestion screenshots are copied as resized JPEGs into local storage and included in manual JSON backups. Original image metadata is discarded. Backup exports contain readable personal data; choose their destination deliberately. Automatic Android backup/device transfer is disabled.
 
-Backup export writes a JSON document to a location you choose. It contains your app data in readable form. Sharing the development list opens the Android share chooser with suggestion text; the receiving app is your choice and has its own privacy practices. Nothing is submitted to GitHub automatically.
+Share development list opens Android’s chooser with text only. Prepare GitHub issue displays a public-data confirmation, then opens a browser with the chosen title and notes; the user reviews and submits the issue on GitHub. Screenshots are not uploaded automatically. The browser and receiving apps have their own privacy practices.
 
-Uninstalling the app removes its private local storage. Keep your own exported backup if you want to restore it later.
+The home-screen widget displays a task title and next action on the home screen. Its content may be visible to someone who can see your unlocked phone. Remove the widget if you prefer to keep task text inside the app.
+
+Notifications support reminders, vibration supports optional feedback, and boot completion reschedules reminders. Uninstalling removes private app storage; keep an exported backup if you want to restore later.

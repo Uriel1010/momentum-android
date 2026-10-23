@@ -30,7 +30,7 @@ data class Delivery(@PrimaryKey val id:String,val taskId:String,val created:Long
 @Entity(tableName="suggestions")
 data class SuggestionRecord(@PrimaryKey val id:String=uuid(),val taskId:String,val created:Long=System.currentTimeMillis(),val outcome:String="suggested")
 @Entity(tableName="development_ideas")
-data class DevelopmentIdea(@PrimaryKey val id:String=uuid(),val title:String,val notes:String="",val status:String="IDEA",val created:Long=System.currentTimeMillis(),val updated:Long=created)
+data class DevelopmentIdea(@PrimaryKey val id:String=uuid(),val title:String,val notes:String="",val status:String="IDEA",val created:Long=System.currentTimeMillis(),val updated:Long=created,@ColumnInfo(defaultValue="'FEATURE'") val category:String="FEATURE",@ColumnInfo(defaultValue="1") val priority:Int=1,@ColumnInfo(defaultValue="''") val screenshot:String="")
 @Dao
 interface MomentumDao {
  @Query("SELECT * FROM development_ideas ORDER BY updated DESC") fun developmentIdeas():Flow<List<DevelopmentIdea>>
@@ -64,10 +64,17 @@ interface MomentumDao {
  @Query("DELETE FROM suggestions") suspend fun clearSuggestions()
  @Query("DELETE FROM events WHERE kind LIKE 'metric_%' OR kind IN ('captured','suggested','dismissed','notification_shown','notification_action')") suspend fun clearMetrics()
 }
-@Database(entities=[Task::class,Project::class,Event::class,Delivery::class,SuggestionRecord::class,DevelopmentIdea::class],version=3,exportSchema=true)
+@Database(entities=[Task::class,Project::class,Event::class,Delivery::class,SuggestionRecord::class,DevelopmentIdea::class],version=4,exportSchema=true)
 abstract class MomentumDb:RoomDatabase() {
  abstract fun dao():MomentumDao
  companion object {
+  val MIGRATION_3_4=object:Migration(3,4) {
+   override fun migrate(db:SupportSQLiteDatabase) {
+    db.execSQL("ALTER TABLE development_ideas ADD COLUMN category TEXT NOT NULL DEFAULT 'FEATURE'")
+    db.execSQL("ALTER TABLE development_ideas ADD COLUMN priority INTEGER NOT NULL DEFAULT 1")
+    db.execSQL("ALTER TABLE development_ideas ADD COLUMN screenshot TEXT NOT NULL DEFAULT ''")
+   }
+  }
   val MIGRATION_2_3=object:Migration(2,3) {
    override fun migrate(db:SupportSQLiteDatabase) {
     db.execSQL("CREATE TABLE IF NOT EXISTS development_ideas (id TEXT NOT NULL, title TEXT NOT NULL, notes TEXT NOT NULL, status TEXT NOT NULL, created INTEGER NOT NULL, updated INTEGER NOT NULL, PRIMARY KEY(id))")
@@ -96,11 +103,17 @@ class Preferences(private val context:Context) {
 }
 class MomentumApp:Application(), androidx.work.Configuration.Provider {
  val scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
- val db by lazy { Room.databaseBuilder(this,MomentumDb::class.java,"momentum.db").addMigrations(MomentumDb.MIGRATION_1_2,MomentumDb.MIGRATION_2_3).build() }
+ val db by lazy { Room.databaseBuilder(this,MomentumDb::class.java,"momentum.db").addMigrations(MomentumDb.MIGRATION_1_2,MomentumDb.MIGRATION_2_3,MomentumDb.MIGRATION_3_4).build() }
  val prefs by lazy { Preferences(this) }
  val repo by lazy { Repository(this,db,prefs) }
  override val workManagerConfiguration get()=androidx.work.Configuration.Builder().setMinimumLoggingLevel(android.util.Log.WARN).build()
- override fun onCreate() { super.onCreate(); scope.launch { repo.reschedule() } }
+ override fun onCreate() { super.onCreate(); scope.launch { repo.reschedule() }
+  scope.launch {
+   combine(db.dao().tasks(),db.dao().projects(),db.dao().events(),prefs.flow){_,_,_,_->Unit}.conflate().collect {
+    try { MomentumWidget.updateAll(this@MomentumApp) } catch(_:Exception) { /* Widget can retry at the next update. */ }
+   }
+  }
+ }
 }
 class Repository(val context:Context,val db:MomentumDb,val prefs:Preferences) {
  val dao=db.dao()
@@ -108,6 +121,8 @@ class Repository(val context:Context,val db:MomentumDb,val prefs:Preferences) {
  suspend fun saveDevelopmentIdea(idea:DevelopmentIdea) {
   require(idea.title.isNotBlank() && idea.title.length<=200 && idea.notes.length<=10000)
   require(idea.status in setOf("IDEA","PLANNED","DONE"))
+  require(idea.category in setOf("FEATURE","BUG") && idea.priority in 0..2)
+  require(SuggestionImages.valid(idea.screenshot))
   dao.saveDevelopmentIdea(idea.copy(title=idea.title.trim(),notes=idea.notes.trim(),updated=System.currentTimeMillis()))
  }
  suspend fun metric(kind:String,id:String?=null) { if(prefs.flow.first().metrics) dao.event(Event(taskId=id,kind=kind)) }

@@ -1,9 +1,12 @@
 package com.momentum.app
 import androidx.lifecycle.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 class MomentumViewModel(val app:MomentumApp):ViewModel() {
+ var developmentDraftImage by androidx.compose.runtime.mutableStateOf("")
  val repo=app.repo
  val developmentIdeas=repo.dao.developmentIdeas().stateIn(viewModelScope,SharingStarted.Eagerly,emptyList())
  val tasks=repo.dao.tasks().stateIn(viewModelScope,SharingStarted.Eagerly,emptyList())

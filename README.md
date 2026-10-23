@@ -1,99 +1,95 @@
 <p align="center"><img src="docs/images/hero.svg" alt="Momentum — a trail of real action" width="100%"></p>
 
-<p align="center">
-  <a href="https://github.com/Uriel1010/momentum-android/releases"><img alt="Release" src="https://img.shields.io/github/v/release/Uriel1010/momentum-android?include_prereleases&amp;color=c0daa5&amp;label=download"></a>
-  <img alt="Android 10 and newer" src="https://img.shields.io/badge/Android-10%2B-152019">
-  <img alt="Kotlin and Jetpack Compose" src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-749263">
-  <img alt="Offline" src="https://img.shields.io/badge/Works-offline-c0daa5">
-</p>
+<p align="center"><a href="https://github.com/Uriel1010/momentum-android/releases/tag/v3.2.0">Download 3.2</a> · <a href="#a-look-inside">Screenshots</a> · <a href="#build">Build</a> · <a href="docs/DEVELOPMENT.md">Developer guide</a></p>
 
-Momentum is a native Android app for turning a crowded mind into one manageable next step. Capture a thought, find an action that fits, and leave a clear trail for when you return.
+Momentum is a native Android app for turning a crowded mind into one manageable next step. Capture a thought, choose an action that fits, and leave a clear trail for when you return.
 
-**No account. No cloud service. No internet permission.** Hebrew with right-to-left layouts and English, with light and dark themes.
+**Offline · Android 10+ · Kotlin / Jetpack Compose · Hebrew RTL + English · Light + dark themes**
 
-<p align="center"><a href="https://github.com/Uriel1010/momentum-android/releases/tag/v3.1.0">Download 3.1</a> · <a href="#a-look-inside">Screenshots</a> · <a href="#build-it">Build</a> · <a href="docs/DEVELOPMENT.md">Development notes</a></p>
+No account, remote backend, or internet permission. Your task data stays on your device unless you explicitly export or share it.
+
+## New in 3.2
+
+- **A home-screen widget.** See a next action, open it, capture a thought, or refresh. Add it through Settings → Add home-screen widget. The launcher asks you to confirm placement.
+- **Where you left off.** The Now screen brings back unfinished work with the last progress note and next step. Completed, waiting, future, and paused-project tasks are excluded.
+- **A richer development backlog.** Suggestions now have Bug / Feature categories, Low / Normal / High priority, and one optional screenshot. Categories can be filtered; higher-priority entries appear first.
+- **Deliberate GitHub sharing.** Prepare an issue, read the public-data reminder, and review it in your browser before submitting. No automatic issue submission or screenshot upload.
+- **A smaller release.** The main APK is approximately 3.4 MiB, non-debuggable, optimized with R8 and resource shrinking, and signed with a private release key. The previous debug APK was roughly 61 MiB.
+- **Unmistakable QA.** Developer builds use a purple icon and the name **Momentum QA**. Most people should install only the main release APK.
 
 ## A look inside
 
-Real app captures from a physical Android device, using synthetic QA content. The core screen gallery is from 3.0; the Suggestions screens below are from 3.1.
+Real app captures with synthetic QA content. The widget image is the actual RemoteViews layout rendered on a physical device in a test host; launcher margins can differ.
 
-| Choose a next step | Stay with it | Return to a project |
-|:---:|:---:|:---:|
-| <img src="docs/images/english-now.png" alt="Now: one recommended action" width="250"> | <img src="docs/images/english-focus.png" alt="Focus: next step and optional timer" width="250"> | <img src="docs/images/english-project.png" alt="Project context and milestones" width="250"> |
+| Pick up where you stopped | Keep your next improvement |
+|:---:|:---:|
+| <img src="docs/images/v32-resume.png" alt="Where you left off: progress note and next action" width="300"> | <img src="docs/images/v32-suggestions.png" alt="Suggestions with bug category, high priority and an attached test image" width="300"> |
 
-<details>
-<summary>Explore the Hebrew light and dark gallery</summary>
+<p align="center"><img src="docs/images/v32-widget.png" alt="Momentum widget with next step, Capture and Refresh" width="520"></p>
 
-![Ten screens in light and dark themes](docs/images/momentum-3.0-grid.png)
+<details><summary>Core app: Now, Focus, Projects, Progress and light/dark themes</summary>
+
+The following gallery was captured for 3.0; it shows the core design before the 3.2 additions above.
+
+![Core screens in light and dark themes](docs/images/momentum-3.0-grid.png)
 
 </details>
 
 ## Built around small, real actions
 
-- **Capture quickly.** A focused capture sheet, optional details, and Android text sharing.
-- **Know what to do next.** Local recommendations consider readiness, small next steps, project context, and postponement. Waiting tasks stay out of actionable recommendations.
-- **Focus gently.** Optional persistent timer, explicit blockers, progress notes, and completion with undo.
-- **Pick up where you stopped.** Project summaries, next steps, milestones, and resumption history.
-- **See what happened.** Progress reflects starts, advances, completions, and milestones.
-- **Stay in control.** Quiet hours, reminder limits, reduced motion, optional local metrics, and JSON backup/restore.
+Capture quickly with optional details and Android text sharing. Local recommendations consider readiness, small next steps and project context. Focus offers a persistent optional timer, progress notes, blockers, and completion with undo. Projects retain summaries, milestones and resumption history. Progress shows real starts, advances and completions.
 
-## New in 3.1: a place for the next idea
-
-Open **Settings → Suggestions for Momentum** to keep a development backlog inside the app.
-
-Add a title and notes, move suggestions through **Idea → Planned → Done**, edit them later, or share the whole list into your next development conversation. Entries stay on your device and are included in exported backups. Sharing opens Android’s chooser; nothing is sent automatically.
-
-| English | עברית |
-|:---:|:---:|
-| <img src="docs/images/suggestions-en.png" alt="English suggestions backlog with a planned improvement" width="300"> | <img src="docs/images/suggestions-he.png" alt="Hebrew suggestions backlog in right-to-left layout" width="300"> |
+Quiet hours, reminder limits, reduced motion, optional local metrics and JSON backups keep you in control.
 
 ## Install
 
-Get the APKs and `SHA256SUMS.txt` from the [3.1 release](https://github.com/Uriel1010/momentum-android/releases/tag/v3.1.0).
+Download from the [3.2 release](https://github.com/Uriel1010/momentum-android/releases/tag/v3.2.0).
 
-| APK | Use |
+| File | Intended use |
 | --- | --- |
-| `momentum-3.1-android.apk` | Main app, package `com.momentum.app`. |
-| `momentum-3.1-qa.apk` | Separate QA app, package `com.momentum.app.qa`; can coexist with the main app. |
+| **`momentum-3.2-release.apk`** | Main app; private release signing, optimized, non-debuggable; package `com.momentum.app`. **Choose this for everyday use.** |
+| `momentum-3.2-qa.apk` | Optional debug build for developers; purple Momentum QA icon; separate package `com.momentum.app.qa`. Installing both creates two apps intentionally. |
+| `SHA256SUMS.txt` | Integrity hashes for both downloads. |
 
-Both APKs support Android 10+ and contain the same 3.1 features. They are **debug-signed development previews**, not production-hardened store releases. QA starts with its own local data; fixture tests are run only against that package. The launcher labels are both Momentum; use Android App info to distinguish their package IDs.
-
-For an existing installation, use an in-place update signed by the same key. Export a backup before changing signing identities. A locally rebuilt APK uses your own debug key and may not update the downloaded APK.
+The release includes a verified signing lineage from the original published debug certificate. It was tested as an in-place update on Android 16, retaining the app UID and local data. It supports Android 10+; key rotation has not been device-tested on every supported Android version. An APK you built with a different debug key cannot update this installation. Do not uninstall your main app to work around a signature error: export a backup and inspect the signing identity first.
 
 ```sh
-adb install -r momentum-3.1-android.apk
-# Optional, separate test installation:
-adb install -r momentum-3.1-qa.apk
+adb install -r momentum-3.2-release.apk
 ```
 
-## Build it
+## Build
 
-Use JDK 17, Android SDK 36, and the included Gradle wrapper. Set `ANDROID_HOME` or point `sdk.dir` in an untracked `local.properties` to your SDK.
+Use JDK 17, Android SDK 36 and the included Gradle wrapper. Set `ANDROID_HOME` or set `sdk.dir` in an untracked `local.properties`.
 
 ```sh
 chmod +x gradlew
-./gradlew assembleDebug testDebugUnitTest lintDebug
+./gradlew assembleRelease testDebugUnitTest lintRelease
+# Unsigned, optimized release: app/build/outputs/apk/release/app-release-unsigned.apk
 
-# Separate app ID for safe fixture testing:
+# Separate test package; copy its outputs before changing build mode:
 ./gradlew -PmomentumQa=true assembleDebug assembleDebugAndroidTest
 ```
 
-Build outputs are under `app/build/outputs/apk/`. Copy the main APK before building QA: both variants use the same output filename. On Windows, use WSL or Android Studio to run this Unix wrapper.
+Release signing keys and passwords are not in this repository. See [signing and upgrade guidance](docs/DEVELOPMENT.md#signing). Windows users can use Android Studio or WSL with the supplied Unix wrapper.
 
 ## Data and privacy
 
-Room stores app records locally; DataStore stores preferences. Reminders use WorkManager. There is no remote backend or account system. Optional measurements remain local and can be cleared in Settings. Android cloud backup is disabled; user-triggered JSON export is available.
+Room stores records locally and DataStore stores preferences. Reminders use WorkManager. No remote analytics or advertising service is included. Optional metrics remain local and can be cleared. Automatic Android backup/device transfer is disabled; manual JSON backup is available.
 
-Version 3.1 adds Room schema 3 and backup schema 2. It migrates from previous database versions and reads schema-1 backups. Restoring an older backup preserves the newer development suggestions, since older backups do not contain them. Schema-2 restore replaces suggestions along with the other backed-up records. Older app versions cannot read new backups.
+Room schema **4** and backup schema **3** include suggestion categories, priorities and embedded screenshots. Database migrations retain older rows. Backups from schema 1 and 2 remain readable. A schema-1 restore preserves development suggestions because that format predates them. Schema-2 suggestions receive default category/priority and no image. Restoring newer backups replaces backed-up records, so use the confirmation carefully.
+
+Screenshots are selected by the user, decoded and saved as resized JPEGs, stripping the original file metadata. Input limit: 10 MB; maximum dimensions: 1280 px; encoded image limit: 700,000 characters. Backups are limited to 20 MB; export rejects larger documents instead of creating an unrestorable backup. Share text does not include screenshot pixels. GitHub draft text opens only after an explicit confirmation.
 
 ## Validation
 
-For 3.1: **37 JVM tests**, **13 device tests** covering the new backlog and core storage/backup behavior, and lint with **0 errors**. The device suite covers edits, filters, draft restoration, deletion confirmation, migration, malformed backups, and legacy compatibility. English and Hebrew screenshots were visually reviewed. The main installation was also upgraded in place and checked for preservation of existing records and settings.
+**41 JVM tests and 52 device test executions passed**, including widget capture, richer suggestions, resume behavior, database migrations, backup compatibility, reminders, denied notification permission, and three flows at 1.5× text size. Release lint completed with zero errors. Screenshots were visually reviewed.
 
-The 3.0 baseline additionally had broader navigation, reminder, process-restoration, and accessibility-layout checks. Those results are historical, not a claim that every scenario was rerun for 3.1. Broad hardware coverage and a human accessibility study remain future work.
+The optimized QA APK passed an in-place signing-rotation trial and launch/capture smoke checks. The main installation passed a private on-device migration/preservation check before the non-debuggable upgrade; its UID was retained, the installed SHA-256 matched the release artifact, and it cold-launched successfully. The QA app and helper packages were then removed from the personal device.
 
-## Keep developing
+These checks are not broad hardware certification. Human TalkBack/switch-access testing, overnight Doze behavior, and exhaustive launcher/device coverage remain outstanding. Widget refresh is event-driven while the app process runs, with platform periodic updates and an explicit Refresh button; updates are not guaranteed to be instant while Android suspends the process.
 
-Use the in-app Suggestions section for private notes. For a public proposal, [open an issue](https://github.com/Uriel1010/momentum-android/issues) with the problem, a small example, and the behavior you would like to see. Do not include private task data or backups.
+## Continue developing
 
-See [architecture and testing](docs/DEVELOPMENT.md), [privacy](PRIVACY.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
+Keep private ideas in Settings → Suggestions for Momentum, or deliberately share a development list. Public proposals belong in [GitHub issues](https://github.com/Uriel1010/momentum-android/issues); review private information before submitting.
+
+[Developer guide](docs/DEVELOPMENT.md) · [Privacy](PRIVACY.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)

@@ -36,6 +36,7 @@ import java.text.DateFormat
 
 class MainActivity:ComponentActivity() {
  private var restoringActivity=false
+ var captureRequested by mutableStateOf(false)
  var sharedText by mutableStateOf("")
  var focusId by mutableStateOf<String?>(null)
  override fun onCreate(savedInstanceState:Bundle?) {
@@ -44,12 +45,13 @@ class MainActivity:ComponentActivity() {
    val vm:MomentumViewModel=viewModel(factory=object:ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST") override fun <T:ViewModel> create(modelClass:Class<T>):T=MomentumViewModel(application as MomentumApp) as T
    })
-   Momentum(vm,sharedText,focusId,{sharedText=""},{focusId=null})
+   Momentum(vm,sharedText,focusId,{sharedText=""},{focusId=null},captureRequested,{captureRequested=false})
   }
  }
  override fun onStart(){super.onStart();val restoring=restoringActivity;restoringActivity=false;(application as MomentumApp).scope.launch{(application as MomentumApp).repo.analytics.open(restoring=restoring)}}
  override fun onNewIntent(intent:Intent) {super.onNewIntent(intent);setIntent(intent);readIntent(intent)}
  private fun readIntent(intent:Intent) {
+  captureRequested=intent.action=="com.momentum.CAPTURE"
   if(intent.action==Intent.ACTION_SEND && intent.type=="text/plain")sharedText=intent.getStringExtra(Intent.EXTRA_TEXT).orEmpty()
   focusId=intent.getStringExtra("focusId")?:intent.getStringExtra("projectId")?.let{"project:"+it}
  }
@@ -65,7 +67,7 @@ val LocalEnglish=staticCompositionLocalOf {false}
  return resources.getString(id)
 }
 @Composable fun dateText(time:Long?):String {val locale=Locale.forLanguageTag(if(LocalEnglish.current)"en" else "he");return time?.let {DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.SHORT,locale).format(java.util.Date(it))}.orEmpty()}
-@Composable fun Momentum(vm:MomentumViewModel,shared:String,focusId:String?,consumeShare:()->Unit,consumeFocus:()->Unit) {
+@Composable fun Momentum(vm:MomentumViewModel,shared:String,focusId:String?,consumeShare:()->Unit,consumeFocus:()->Unit,captureRequested:Boolean=false,consumeCapture:()->Unit={}) {
  val prefs by vm.prefs.collectAsStateWithLifecycle()
  val base=LocalContext.current
  val systemConfig=LocalConfiguration.current
@@ -75,11 +77,11 @@ val LocalEnglish=staticCompositionLocalOf {false}
  val colors=if(prefs.dynamic && Build.VERSION.SDK_INT>=31) {if(dark)dynamicDarkColorScheme(base) else dynamicLightColorScheme(base)} else momentumColors(dark)
 
  CompositionLocalProvider(LocalReduceMotion provides prefs.reducedMotion,LocalEnglish provides prefs.english,LocalContext provides localized,LocalConfiguration provides localizedConfig,LocalLayoutDirection provides if(prefs.english)LayoutDirection.Ltr else LayoutDirection.Rtl) {
- MaterialTheme(colorScheme=colors,typography=MomentumTypography) { Surface(Modifier.fillMaxSize()) { AppContent(vm,shared,focusId,consumeShare,consumeFocus) } }
+ MaterialTheme(colorScheme=colors,typography=MomentumTypography) { Surface(Modifier.fillMaxSize()) { AppContent(vm,shared,focusId,consumeShare,consumeFocus,captureRequested,consumeCapture) } }
  }
 }
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable fun AppContent(vm:MomentumViewModel,shared:String,focusId:String?,consumeShare:()->Unit,consumeFocus:()->Unit) {
+@Composable fun AppContent(vm:MomentumViewModel,shared:String,focusId:String?,consumeShare:()->Unit,consumeFocus:()->Unit,captureRequested:Boolean=false,consumeCapture:()->Unit={}) {
  val prefs by vm.prefs.collectAsStateWithLifecycle()
  val tasks by vm.tasks.collectAsStateWithLifecycle()
  val projects by vm.projects.collectAsStateWithLifecycle()
@@ -105,6 +107,7 @@ val LocalEnglish=staticCompositionLocalOf {false}
  val importantDone=tr(R.string.ux_you_made_room_for_something_that_matte_e8538)
  fun message(id:Int) {scope.launch {snackbar.showSnackbar(context.getString(id))}}
  LaunchedEffect(vm) {vm.messages.collect {message(it)}}
+ LaunchedEffect(captureRequested,loaded,prefs.onboarded){if(captureRequested && loaded && prefs.onboarded){initialText="";newTask=true;consumeCapture()}}
  LaunchedEffect(shared) {if(shared.isNotBlank()){initialText=shared;newTask=true;consumeShare()}}
  LaunchedEffect(focusId,loaded) {if(loaded && focusId!=null) {nav.navigate(if(focusId.startsWith("project:"))"project/"+focusId.removePrefix("project:") else "focus/$focusId");consumeFocus()}}
  val export=rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) {uri->

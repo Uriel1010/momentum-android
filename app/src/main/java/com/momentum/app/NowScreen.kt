@@ -58,6 +58,8 @@ import java.time.LocalTime
  val hour=LocalTime.now().hour
  Page(spacing=12.dp) {
   Text(tr(R.string.ux_start_with_something_small_e3a7a),style=MaterialTheme.typography.headlineMedium)
+  val resume=ResumePolicy.latest(tasks,projects,events,now)
+  if(resume!=null)ResumeCard(resume){onStart(resume.task)}
   Choices(listOf(0,2,5,15,30).map{it.toString() to if(it==0)tr(R.string.ux_your_pace_79575) else "$it ${tr(R.string.minutes)}"},minutes.toString(),{minutes=it.toInt()})
   AnimatedContent(targetState=if(prefs.suggestions)suggestion?.task?.id else null,label="next step",transitionSpec={if(prefs.reducedMotion)EnterTransition.None togetherWith ExitTransition.None else fadeIn() togetherWith fadeOut()}) {id->
    val s=candidates.find{it.task.id==id}

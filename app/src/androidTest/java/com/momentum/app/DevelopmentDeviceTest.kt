@@ -25,7 +25,7 @@ class DevelopmentDeviceTest {
   compose.onNodeWithTag("ideaNotes").performTextInput("Add a gentle Sunday summary. רעיון לבדיקה")
   compose.activityRule.scenario.recreate()
   compose.onNodeWithTag("ideaTitle").assertTextContains("Improve the weekly review")
-  compose.onAllNodesWithText("Planned").onLast().performClick()
+  compose.onAllNodesWithText("Planned").onLast().performScrollTo().performClick()
   compose.onNodeWithText("Save").performClick()
   compose.waitUntil(10000){runBlocking{app.db.dao().allDevelopmentIdeas().size==1}}
   compose.onNodeWithText("Improve the weekly review").performClick()
@@ -34,14 +34,14 @@ class DevelopmentDeviceTest {
   compose.waitUntil(10000){runBlocking{app.db.dao().allDevelopmentIdeas().single().title=="Weekly review reminder"}}
   compose.onAllNodesWithText("Done").onFirst().performClick()
   compose.onNodeWithText("Weekly review reminder").assertDoesNotExist()
-  compose.onNodeWithText("All").performClick()
+  compose.onAllNodesWithText("All").onFirst().performClick()
   compose.activityRule.scenario.recreate();waitText("Weekly review reminder")
   compose.onRoot().captureToImage().asAndroidBitmap().let {bitmap->File(app.getExternalFilesDir(null),"development-en.png").outputStream().use{bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)}}
   compose.onNodeWithText("Weekly review reminder").performClick()
-  compose.onNodeWithText("Delete").performScrollTo().performClick()
+  compose.onNodeWithTag("ideaEditorList").performScrollToNode(hasText("Delete"));compose.onNodeWithText("Delete").performClick()
   compose.onNodeWithText("Cancel").performClick()
   assertEquals(1,runBlocking{app.db.dao().allDevelopmentIdeas().size})
-  compose.onNodeWithText("Delete").performScrollTo().performClick()
+  compose.onNodeWithTag("ideaEditorList").performScrollToNode(hasText("Delete"));compose.onNodeWithText("Delete").performClick()
   compose.onAllNodesWithText("Delete").onLast().performClick()
   compose.waitUntil(10000){runBlocking{app.db.dao().allDevelopmentIdeas().isEmpty()}}
  }
@@ -57,7 +57,7 @@ class DevelopmentDeviceTest {
   val legacy=JSONObject(backup).apply{put("schema",1);remove("developmentIdeas")}
   Backup.restore(app.repo,legacy.toString())
   assertEquals("Legacy backup preserves newer suggestions",1,app.db.dao().allDevelopmentIdeas().size)
-  assertTrue(developmentIdeasText(app.db.dao().allDevelopmentIdeas()).contains("[PLANNED] Widget"))
+  assertTrue(developmentIdeasText(app.db.dao().allDevelopmentIdeas()).contains("[PLANNED] [FEATURE] [priority 1] Widget"))
   try{app.repo.saveDevelopmentIdea(DevelopmentIdea(title=" "));fail()}catch(_:IllegalArgumentException){}
  }
  @Test fun migrationTwoToThreePreservesExistingRows(){

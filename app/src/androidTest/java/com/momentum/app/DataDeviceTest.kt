@@ -48,7 +48,7 @@ class DataDeviceTest {
   assertEquals(t.title,db.dao().task(t.id)?.title)
   assertEquals("התקדמות נשמרת",db.dao().allProjects().single().summary)
   assertEquals(1,db.dao().allSuggestions().size)
-  try {Backup.restore(repo,before.replace("\"schema\": 2","\"schema\": 99"));fail()} catch(_:IllegalArgumentException){}
+  try {Backup.restore(repo,before.replace("\"schema\": 3","\"schema\": 99"));fail()} catch(_:IllegalArgumentException){}
   assertEquals(t.title,db.dao().task(t.id)?.title)
   try {Backup.restore(repo,"{broken");fail()} catch(_:org.json.JSONException){}
   assertEquals(t.title,db.dao().task(t.id)?.title)
