@@ -18,10 +18,18 @@ class StarterStackDeviceTest {
   compose.onRoot().captureToImage().asAndroidBitmap().let{b->File(app.filesDir,"starter-stack.png").outputStream().use{b.compress(Bitmap.CompressFormat.PNG,100,it)}}
   compose.onNodeWithTag("stackNext").performScrollTo().performClick();waitText("Task 2 of 3");compose.onNodeWithText("Write the opening paragraph").assertExists()
   compose.onNodeWithTag("stackPrevious").performScrollTo().performClick();waitText("Task 1 of 3")
-  compose.onNodeWithTag("starterStack").performTouchInput{swipeLeft()};waitText("Task 2 of 3")
+  compose.onNodeWithTag("starterStack").performTouchInput{swipe(androidx.compose.ui.geometry.Offset(width*.8f,centerY),androidx.compose.ui.geometry.Offset(width*.2f,centerY),400)};waitText("Task 2 of 3")
   runBlocking{assertTrue(app.db.dao().allTasks().all{it.status=="READY" && it.available==0L});assertFalse(app.db.dao().allEvents().any{it.kind in setOf("started","postponed","completed")})}
   compose.onNodeWithTag("homePrimary").performScrollTo().performClick();waitText("I’m done")
   assertEquals("IN_PROGRESS",runBlocking{app.db.dao().task("stack-1")!!.status});assertEquals("READY",runBlocking{app.db.dao().task("stack-0")!!.status})
+ }
+ @Test fun shortDragReturnsAndReducedMotionStillNavigates(){
+  waitText("Task 1 of 3")
+  compose.onNodeWithTag("starterStack").performTouchInput{swipe(center,center+androidx.compose.ui.geometry.Offset(-25f,0f),300)}
+  compose.mainClock.advanceTimeBy(1000);compose.onNodeWithText("Task 1 of 3").assertExists()
+  runBlocking{app.prefs.bool("reducedMotion",true)}
+  compose.onNodeWithTag("stackNext").performScrollTo().performClick();waitText("Task 2 of 3")
+  runBlocking{app.prefs.bool("reducedMotion",false)}
  }
  @Test fun removingVisibleCardLeavesValidSelection(){
   waitText("Task 1 of 3");compose.onNodeWithTag("stackNext").performScrollTo().performClick();waitText("Task 2 of 3")

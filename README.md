@@ -32,7 +32,7 @@ These are real Android app captures with synthetic example content. Light theme 
 
 ## A stack of starting points
 
-Swipe the opening cards to choose from up to five tasks. Your unfinished work comes first, followed by suggestions from your own tasks. Previous/Next buttons offer the same control. Browsing does not change a task; press Start when you are ready.
+Swipe the loosely stacked cards to choose from up to five tasks. The front card follows your finger, then slides away as the next one moves into place. Your unfinished work comes first, followed by suggestions from your own tasks. Previous/Next buttons offer the same control. Browsing does not change a task; press Start when you are ready.
 
 <details><summary>See the starter-task stack</summary>
 
@@ -105,8 +105,8 @@ Download the APK from the [latest release](https://github.com/Uriel1010/momentum
 
 | Download | Choose this when… |
 | --- | --- |
-| **`momentum-4.6-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
-| `momentum-4.6-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
+| **`momentum-4.6.1-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
+| `momentum-4.6.1-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
 | `SHA256SUMS.txt` | You want to verify download integrity. |
 
 Existing users can install the main release over the previous official version. Do not uninstall to work around a signing mismatch; make a backup first and check the signing identity. The optional QA APK is not needed for normal use.

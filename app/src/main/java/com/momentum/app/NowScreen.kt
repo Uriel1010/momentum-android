@@ -1,5 +1,9 @@
 package com.momentum.app
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -70,7 +74,13 @@ import java.time.LocalTime
  var selectedTaskId by rememberSaveable {mutableStateOf<String?>(null)}
  val deckIndex=deck.indexOfFirst{it.id==selectedTaskId}.coerceAtLeast(0)
  val primary=deck.getOrNull(deckIndex)
- fun nextCard(delta:Int){if(deck.isNotEmpty())selectedTaskId=deck[(deckIndex+delta+deck.size)%deck.size].id}
+ var slideDirection by remember {mutableIntStateOf(1)}
+ var dragOffset by remember {mutableFloatStateOf(0f)}
+ var dragging by remember {mutableStateOf(false)}
+ var stackWidth by remember {mutableFloatStateOf(1f)}
+ val visualDrag by animateFloatAsState(if(prefs.reducedMotion)0f else dragOffset,animationSpec=if(dragging || prefs.reducedMotion)snap() else spring(dampingRatio=.8f,stiffness=500f),label="card follows finger")
+ fun nextCard(delta:Int){if(deck.isNotEmpty()){slideDirection=delta;selectedTaskId=deck[(deckIndex+delta+deck.size)%deck.size].id}}
+ LaunchedEffect(primary?.id){dragOffset=0f;dragging=false}
  val direction=LocalLayoutDirection.current
  val threshold=with(LocalDensity.current){60.dp.toPx()}
  val stackColor=MaterialTheme.colorScheme.secondaryContainer
@@ -79,18 +89,29 @@ import java.time.LocalTime
  Page(spacing=14.dp) {
   Column {Text(tr(R.string.home_heading),style=MaterialTheme.typography.headlineLarge);InkUnderline()}
   Text(tr(when{tasks.isEmpty()->R.string.home_empty_intro;deck.size>1->R.string.stack_intro;resume?.task?.id==primary?.id && resume!=null->R.string.home_resume_intro;primary!=null->R.string.home_ready_intro;else->R.string.home_choose_intro}),color=MaterialTheme.colorScheme.onSurfaceVariant)
-  Box(Modifier.fillMaxWidth().testTag("starterStack").padding(bottom=if(deck.size>1)16.dp else 0.dp).drawBehind{
+  Box(Modifier.fillMaxWidth().testTag("starterStack").padding(horizontal=if(deck.size>1)8.dp else 0.dp,vertical=if(deck.size>1)12.dp else 0.dp).onSizeChanged{stackWidth=it.width.toFloat().coerceAtLeast(1f)}.drawBehind{
    if(deck.size>1){
-    if(deck.size>2)drawRoundRect(backColor,Offset(20.dp.toPx(),16.dp.toPx()),Size((size.width-40.dp.toPx()).coerceAtLeast(0f),size.height),CornerRadius(22.dp.toPx()))
-    drawRoundRect(stackColor,Offset(10.dp.toPx(),8.dp.toPx()),Size((size.width-20.dp.toPx()).coerceAtLeast(0f),size.height),CornerRadius(22.dp.toPx()))
+    if(deck.size>2)rotate(-4.5f){drawRoundRect(backColor,Offset(12.dp.toPx(),14.dp.toPx()),Size((size.width-24.dp.toPx()).coerceAtLeast(0f),size.height),CornerRadius(22.dp.toPx()))}
+    rotate(3.5f){drawRoundRect(stackColor,Offset(5.dp.toPx(),7.dp.toPx()),Size((size.width-10.dp.toPx()).coerceAtLeast(0f),size.height),CornerRadius(22.dp.toPx()))}
    }
   }.pointerInput(deck.map{it.id},deckIndex,direction){
    var distance=0f
-   detectHorizontalDragGestures(onDragStart={distance=0f},onDragCancel={distance=0f},onDragEnd={
+   detectHorizontalDragGestures(onDragStart={distance=0f;dragging=true},onDragCancel={distance=0f;dragging=false;dragOffset=0f},onDragEnd={
     if(kotlin.math.abs(distance)>threshold){val forward=if(direction==LayoutDirection.Ltr)distance<0 else distance>0;nextCard(if(forward)1 else -1)}
-   }){change,amount->if(deck.size>1){change.consume();distance+=amount}}
+    dragging=false;dragOffset=0f
+   }){change,amount->if(deck.size>1){change.consume();distance+=amount;dragOffset=distance.coerceIn(-stackWidth*.65f,stackWidth*.65f)}}
   }){
-  AnimatedContent(targetState=primary?.id,label="next invitation",transitionSpec={if(prefs.reducedMotion)EnterTransition.None togetherWith ExitTransition.None else fadeIn() togetherWith fadeOut()}) {id->
+  AnimatedContent(targetState=primary?.id,modifier=Modifier.graphicsLayer{
+   translationX=visualDrag
+   rotationZ=if(prefs.reducedMotion || deck.size<2)0f else -1.2f+(visualDrag/stackWidth)*12f
+  },label="starter card slide",transitionSpec={
+   if(prefs.reducedMotion || initialState==null || targetState==null)EnterTransition.None togetherWith ExitTransition.None
+   else {
+    val sign=slideDirection*(if(direction==LayoutDirection.Ltr)1 else -1)
+    ((slideInHorizontally(spring(dampingRatio=.85f,stiffness=450f)){sign*it/2}+fadeIn(tween(220))) togetherWith
+     (slideOutHorizontally(tween(220)){-sign*it}+fadeOut(tween(180)))).using(SizeTransform(clip=false))
+   }
+  }) {id->
    val t=deck.firstOrNull{it.id==id}
    if(t!=null)ActionPanel {
     Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
