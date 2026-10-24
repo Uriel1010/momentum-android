@@ -308,4 +308,8 @@
 <string name="home_tasks_help">Tasks — choose, edit, finish or reopen anything you saved.</string>
 <string name="home_projects_help">Projects — group related tasks when you need a bigger plan. This is optional.</string>
 <string name="home_progress_help">Progress — see what you started and completed. No setup needed.</string>
+<string name="stack_intro">Pick a starting point. Swipe the cards to choose a task.</string>
+<string name="stack_previous">Previous</string>
+<string name="stack_next">Next task</string>
+<string name="stack_position">Task %1$d of %2$d</string>
 </resources>

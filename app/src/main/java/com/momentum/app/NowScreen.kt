@@ -1,6 +1,13 @@
 package com.momentum.app
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.foundation.text.*
@@ -59,13 +66,32 @@ import java.time.LocalTime
  val candidates=remember(tasks,projects,minutes,easy,selectedContext,now,events){NowPolicy.candidates(tasks,projects,now,minutes,easy,selectedContext,events)}
  val suggestion=if(prefs.suggestions)candidates.firstOrNull() else null
  val resume=ResumePolicy.latest(tasks,projects,events,now)
- val primary=resume?.task?:suggestion?.task
- LaunchedEffect(suggestion?.task?.id){suggestion?.let{vm.repo.analytics.record("recommended",it.task.id)}}
+ val deck=(listOfNotNull(resume?.task)+(if(prefs.suggestions)candidates.map{it.task} else emptyList())).distinctBy{it.id}.take(5)
+ var selectedTaskId by rememberSaveable {mutableStateOf<String?>(null)}
+ val deckIndex=deck.indexOfFirst{it.id==selectedTaskId}.coerceAtLeast(0)
+ val primary=deck.getOrNull(deckIndex)
+ fun nextCard(delta:Int){if(deck.isNotEmpty())selectedTaskId=deck[(deckIndex+delta+deck.size)%deck.size].id}
+ val direction=LocalLayoutDirection.current
+ val threshold=with(LocalDensity.current){60.dp.toPx()}
+ val stackColor=MaterialTheme.colorScheme.secondaryContainer
+ val backColor=MaterialTheme.colorScheme.surfaceContainerHighest
+ LaunchedEffect(primary?.id){if(prefs.suggestions)primary?.let{vm.repo.analytics.record("recommended",it.id)}}
  Page(spacing=14.dp) {
   Column {Text(tr(R.string.home_heading),style=MaterialTheme.typography.headlineLarge);InkUnderline()}
-  Text(tr(when{tasks.isEmpty()->R.string.home_empty_intro;resume!=null->R.string.home_resume_intro;primary!=null->R.string.home_ready_intro;else->R.string.home_choose_intro}),color=MaterialTheme.colorScheme.onSurfaceVariant)
+  Text(tr(when{tasks.isEmpty()->R.string.home_empty_intro;deck.size>1->R.string.stack_intro;resume?.task?.id==primary?.id && resume!=null->R.string.home_resume_intro;primary!=null->R.string.home_ready_intro;else->R.string.home_choose_intro}),color=MaterialTheme.colorScheme.onSurfaceVariant)
+  Box(Modifier.fillMaxWidth().testTag("starterStack").padding(bottom=if(deck.size>1)16.dp else 0.dp).drawBehind{
+   if(deck.size>1){
+    if(deck.size>2)drawRoundRect(backColor,Offset(20.dp.toPx(),16.dp.toPx()),Size((size.width-40.dp.toPx()).coerceAtLeast(0f),size.height),CornerRadius(22.dp.toPx()))
+    drawRoundRect(stackColor,Offset(10.dp.toPx(),8.dp.toPx()),Size((size.width-20.dp.toPx()).coerceAtLeast(0f),size.height),CornerRadius(22.dp.toPx()))
+   }
+  }.pointerInput(deck.map{it.id},deckIndex,direction){
+   var distance=0f
+   detectHorizontalDragGestures(onDragStart={distance=0f},onDragCancel={distance=0f},onDragEnd={
+    if(kotlin.math.abs(distance)>threshold){val forward=if(direction==LayoutDirection.Ltr)distance<0 else distance>0;nextCard(if(forward)1 else -1)}
+   }){change,amount->if(deck.size>1){change.consume();distance+=amount}}
+  }){
   AnimatedContent(targetState=primary?.id,label="next invitation",transitionSpec={if(prefs.reducedMotion)EnterTransition.None togetherWith ExitTransition.None else fadeIn() togetherWith fadeOut()}) {id->
-   val t=primary?.takeIf{it.id==id}
+   val t=deck.firstOrNull{it.id==id}
    if(t!=null)ActionPanel {
     Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
      Text(tr(if(resume?.task?.id==t.id)R.string.resume_title else R.string.neo_next_small),style=MaterialTheme.typography.labelMedium,modifier=Modifier.weight(1f))
@@ -101,8 +127,13 @@ import java.time.LocalTime
     PrimaryAction(tr(if(tasks.isEmpty())R.string.home_add_first else if(add)R.string.home_add_next else R.string.home_review_tasks),if(add)onQuickCapture else onBrowse,modifier=Modifier.testTag("homePrimary"))
    }
   }
+  }
+  if(deck.size>1)Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween){
+   TextButton({nextCard(-1)},Modifier.testTag("stackPrevious")){Text(tr(R.string.stack_previous))}
+   Text(tr(R.string.stack_position).format(deckIndex+1,deck.size),style=MaterialTheme.typography.labelMedium,modifier=Modifier.semantics{liveRegion=LiveRegionMode.Polite})
+   TextButton({nextCard(1)},Modifier.testTag("stackNext")){Text(tr(R.string.stack_next))}
+  }
   primary?.let{t->Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
-   TextButton({vm.defer(t,false);now=System.currentTimeMillis()}){Text(tr(R.string.other))}
    TextButton({stuck=t;note=""}){Text(tr(R.string.stuck))}
    TextButton({onLater(t);now=System.currentTimeMillis()}){Text(tr(R.string.later))}
   }}

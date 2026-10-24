@@ -308,4 +308,8 @@
 <string name="home_tasks_help">משימות — בחירה, עריכה, השלמה או פתיחה מחדש של כל מה ששמרת.</string>
 <string name="home_projects_help">פרויקטים — קיבוץ משימות קשורות כשצריך תוכנית גדולה יותר. לא חובה.</string>
 <string name="home_progress_help">התקדמות — לראות מה התחלת ומה השלמת. אין צורך בהגדרה.</string>
+<string name="stack_intro">בוחרים נקודת התחלה. מחליקים בין הכרטיסים כדי לבחור משימה.</string>
+<string name="stack_previous">הקודמת</string>
+<string name="stack_next">המשימה הבאה</string>
+<string name="stack_position">משימה %1$d מתוך %2$d</string>
 </resources>
