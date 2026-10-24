@@ -2,7 +2,7 @@ plugins { id("com.android.application"); id("org.jetbrains.kotlin.android"); id(
 android {
  namespace="com.momentum.app"; compileSdk=36
  defaultConfig {
-  applicationId=if(providers.gradleProperty("momentumQa").isPresent)"com.momentum.app.qa" else "com.momentum.app"; minSdk=29; targetSdk=36; versionCode=15; versionName="4.6.1"
+  applicationId=if(providers.gradleProperty("momentumQa").isPresent)"com.momentum.app.qa" else "com.momentum.app"; minSdk=29; targetSdk=36; versionCode=16; versionName="4.6.2"
   manifestPlaceholders["appLabel"]=if(providers.gradleProperty("momentumQa").isPresent)"Momentum QA" else "Momentum"
   manifestPlaceholders["appIcon"]=if(providers.gradleProperty("momentumQa").isPresent)"@drawable/ic_momentum_qa" else "@drawable/ic_momentum"
   testInstrumentationRunner="androidx.test.runner.AndroidJUnitRunner"

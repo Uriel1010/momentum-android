@@ -27,6 +27,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineStart
+import androidx.compose.ui.graphics.Color
 import java.time.LocalTime
 
 @Composable fun QuickCapture(onCapture:(String)->Unit,modifier:Modifier=Modifier) {
@@ -77,43 +80,52 @@ import java.time.LocalTime
  var slideDirection by remember {mutableIntStateOf(1)}
  var dragOffset by remember {mutableFloatStateOf(0f)}
  var dragging by remember {mutableStateOf(false)}
+ var moving by remember {mutableStateOf(false)}
  var stackWidth by remember {mutableFloatStateOf(1f)}
- val visualDrag by animateFloatAsState(if(prefs.reducedMotion)0f else dragOffset,animationSpec=if(dragging || prefs.reducedMotion)snap() else spring(dampingRatio=.8f,stiffness=500f),label="card follows finger")
- fun nextCard(delta:Int){if(deck.isNotEmpty()){slideDirection=delta;selectedTaskId=deck[(deckIndex+delta+deck.size)%deck.size].id}}
- LaunchedEffect(primary?.id){dragOffset=0f;dragging=false}
+ val motion=remember{Animatable(0f)}
+ val scope=rememberCoroutineScope()
  val direction=LocalLayoutDirection.current
  val threshold=with(LocalDensity.current){60.dp.toPx()}
- val stackColor=MaterialTheme.colorScheme.secondaryContainer
- val backColor=MaterialTheme.colorScheme.surfaceContainerHighest
+ val visualDrag=if(prefs.reducedMotion)0f else if(dragging)dragOffset else motion.value
+ val promotion=(kotlin.math.abs(visualDrag)/stackWidth).coerceIn(0f,1f)
+ val palette=listOf(Neo.Lime,Neo.Purple,Color(0xFFBDE5EE),Color(0xFFFFD5B5),Color(0xFFF2EB8D))
+ fun nextCard(delta:Int){
+  if(deck.size<2 || moving)return
+  slideDirection=delta
+  val target=deck[(deckIndex+delta+deck.size)%deck.size].id
+  if(prefs.reducedMotion){selectedTaskId=target;dragOffset=0f;dragging=false;return}
+  moving=true
+  scope.launch(start=CoroutineStart.UNDISPATCHED){
+   try{motion.snapTo(if(dragging)dragOffset else 0f);dragging=false
+    motion.animateTo(-delta*(if(direction==LayoutDirection.Ltr)1 else -1)*stackWidth*1.25f,tween(280,easing=FastOutSlowInEasing))
+    selectedTaskId=target;motion.snapTo(0f);dragOffset=0f
+   }finally{moving=false}
+  }
+ }
+ fun settleCard(){if(moving)return;scope.launch(start=CoroutineStart.UNDISPATCHED){motion.snapTo(dragOffset);dragging=false;motion.animateTo(0f,spring(dampingRatio=.85f,stiffness=500f));dragOffset=0f}}
  LaunchedEffect(primary?.id){if(prefs.suggestions)primary?.let{vm.repo.analytics.record("recommended",it.id)}}
  Page(spacing=14.dp) {
   Column {Text(tr(R.string.home_heading),style=MaterialTheme.typography.headlineLarge);InkUnderline()}
   Text(tr(when{tasks.isEmpty()->R.string.home_empty_intro;deck.size>1->R.string.stack_intro;resume?.task?.id==primary?.id && resume!=null->R.string.home_resume_intro;primary!=null->R.string.home_ready_intro;else->R.string.home_choose_intro}),color=MaterialTheme.colorScheme.onSurfaceVariant)
-  Box(Modifier.fillMaxWidth().testTag("starterStack").padding(horizontal=if(deck.size>1)8.dp else 0.dp,vertical=if(deck.size>1)12.dp else 0.dp).onSizeChanged{stackWidth=it.width.toFloat().coerceAtLeast(1f)}.drawBehind{
-   if(deck.size>1){
-    if(deck.size>2)rotate(-4.5f){drawRoundRect(backColor,Offset(12.dp.toPx(),14.dp.toPx()),Size((size.width-24.dp.toPx()).coerceAtLeast(0f),size.height),CornerRadius(22.dp.toPx()))}
-    rotate(3.5f){drawRoundRect(stackColor,Offset(5.dp.toPx(),7.dp.toPx()),Size((size.width-10.dp.toPx()).coerceAtLeast(0f),size.height),CornerRadius(22.dp.toPx()))}
-   }
-  }.pointerInput(deck.map{it.id},deckIndex,direction){
-   var distance=0f
-   detectHorizontalDragGestures(onDragStart={distance=0f;dragging=true},onDragCancel={distance=0f;dragging=false;dragOffset=0f},onDragEnd={
-    if(kotlin.math.abs(distance)>threshold){val forward=if(direction==LayoutDirection.Ltr)distance<0 else distance>0;nextCard(if(forward)1 else -1)}
-    dragging=false;dragOffset=0f
-   }){change,amount->if(deck.size>1){change.consume();distance+=amount;dragOffset=distance.coerceIn(-stackWidth*.65f,stackWidth*.65f)}}
+  if(primary!=null)Box(Modifier.fillMaxWidth().testTag("starterStack").padding(horizontal=8.dp,vertical=14.dp).onSizeChanged{stackWidth=it.width.toFloat().coerceAtLeast(1f)}.pointerInput(deck.map{it.id},deckIndex,direction,prefs.reducedMotion){
+   detectHorizontalDragGestures(onDragStart={if(!moving){dragOffset=0f;dragging=true}},onDragCancel={settleCard()},onDragEnd={
+    if(!moving){if(kotlin.math.abs(dragOffset)>threshold){val forward=if(direction==LayoutDirection.Ltr)dragOffset<0 else dragOffset>0;nextCard(if(forward)1 else -1)}else settleCard()}
+   }){change,amount->if(deck.size>1 && !moving){change.consume();dragOffset=(dragOffset+amount).coerceIn(-stackWidth,stackWidth);slideDirection=if((dragOffset<0)==(direction==LayoutDirection.Ltr))1 else -1}}
   }){
-  AnimatedContent(targetState=primary?.id,modifier=Modifier.graphicsLayer{
-   translationX=visualDrag
-   rotationZ=if(prefs.reducedMotion || deck.size<2)0f else -1.2f+(visualDrag/stackWidth)*12f
-  },label="starter card slide",transitionSpec={
-   if(prefs.reducedMotion || initialState==null || targetState==null)EnterTransition.None togetherWith ExitTransition.None
-   else {
-    val sign=slideDirection*(if(direction==LayoutDirection.Ltr)1 else -1)
-    ((slideInHorizontally(spring(dampingRatio=.85f,stiffness=450f)){sign*it/2}+fadeIn(tween(220))) togetherWith
-     (slideOutHorizontally(tween(220)){-sign*it}+fadeOut(tween(180)))).using(SizeTransform(clip=false))
-   }
-  }) {id->
-   val t=deck.firstOrNull{it.id==id}
-   if(t!=null)ActionPanel {
+   for(depth in (minOf(deck.size,3)-1) downTo 0){
+    val index=(deckIndex+depth*slideDirection+deck.size)%deck.size
+    val t=deck[index]
+    val active=depth==0
+    val effectiveDepth=if(active)0f else depth-promotion
+    val angle=if(active)-1.2f else if(depth==1)3.5f else -4.5f
+    Box(Modifier.fillMaxWidth().then(if(active)Modifier else Modifier.clearAndSetSemantics{}).graphicsLayer{
+     translationX=if(active)visualDrag else effectiveDepth*4.dp.toPx()
+     translationY=if(active)0f else effectiveDepth*8.dp.toPx()
+     scaleX=if(active)1f else 1f-effectiveDepth*.025f
+     scaleY=if(active)1f else 1f-effectiveDepth*.025f
+     rotationZ=if(prefs.reducedMotion)0f else if(active)-1.2f+(visualDrag/stackWidth)*10f else angle+(-1.2f-angle)*promotion
+    }){
+    ActionPanel(fill=palette[index%palette.size]) {
     Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
      Text(tr(if(resume?.task?.id==t.id)R.string.resume_title else R.string.neo_next_small),style=MaterialTheme.typography.labelMedium,modifier=Modifier.weight(1f))
      Icon(Icons.Default.NorthEast,null,Modifier.size(24.dp))
@@ -127,8 +139,11 @@ import java.time.LocalTime
      projects.find{it.id==t.projectId}?.let{Text("· "+it.title,Modifier.weight(1f),style=MaterialTheme.typography.labelMedium,maxLines=2,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)}
     }
     if(events.count{it.taskId==t.id && it.kind=="postponed"}>=3)Text(tr(R.string.ux_this_has_waited_a_few_times_just_the_f_307f9),style=MaterialTheme.typography.bodySmall)
-    PrimaryAction(tr(if(resume?.task?.id==t.id)R.string.resume_action else R.string.start),{onStart(t)},modifier=Modifier.testTag("homePrimary"),ink=true)
-   } else QuietPanel {
+    PrimaryAction(tr(if(resume?.task?.id==t.id)R.string.resume_action else R.string.start),{if(active && !moving)onStart(t)},modifier=if(active)Modifier.testTag("homePrimary") else Modifier,ink=true)
+    }
+    }
+   }
+  } else QuietPanel {
     Text(when {
      !prefs.suggestions && tasks.any{it.status !in setOf("DONE","ARCHIVED")}->tr(R.string.home_manual_title)
      tasks.isEmpty()->tr(R.string.home_first_title)
@@ -146,8 +161,6 @@ import java.time.LocalTime
     })
     val add=tasks.none{it.status !in setOf("DONE","ARCHIVED")}
     PrimaryAction(tr(if(tasks.isEmpty())R.string.home_add_first else if(add)R.string.home_add_next else R.string.home_review_tasks),if(add)onQuickCapture else onBrowse,modifier=Modifier.testTag("homePrimary"))
-   }
-  }
   }
   if(deck.size>1)Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween){
    TextButton({nextCard(-1)},Modifier.testTag("stackPrevious")){Text(tr(R.string.stack_previous))}

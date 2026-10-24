@@ -2,6 +2,7 @@ package com.momentum.app
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.test.platform.app.InstrumentationRegistry
 import android.graphics.Bitmap
 import kotlinx.coroutines.runBlocking
@@ -17,6 +18,12 @@ class StarterStackDeviceTest {
   waitText("Task 1 of 3");compose.mainClock.advanceTimeBy(1000);compose.waitForIdle()
   compose.onRoot().captureToImage().asAndroidBitmap().let{b->File(app.filesDir,"starter-stack.png").outputStream().use{b.compress(Bitmap.CompressFormat.PNG,100,it)}}
   compose.onNodeWithTag("stackNext").performScrollTo().performClick();waitText("Task 2 of 3");compose.onNodeWithText("Write the opening paragraph").assertExists()
+  compose.mainClock.advanceTimeBy(1000);compose.waitForIdle()
+  val revealed=compose.onRoot().captureToImage().asAndroidBitmap()
+  File(app.filesDir,"starter-stack-next.png").outputStream().use{revealed.compress(Bitmap.CompressFormat.PNG,100,it)}
+  val pixels=IntArray(revealed.width*revealed.height);revealed.getPixels(pixels,0,revealed.width,0,0,revealed.width,revealed.height)
+  assertTrue("The revealed task must retain the purple card color",pixels.count{it==Neo.Purple.toArgb()}>pixels.count{it==Neo.Lime.toArgb()})
+
   compose.onNodeWithTag("stackPrevious").performScrollTo().performClick();waitText("Task 1 of 3")
   compose.onNodeWithTag("starterStack").performTouchInput{swipe(androidx.compose.ui.geometry.Offset(width*.8f,centerY),androidx.compose.ui.geometry.Offset(width*.2f,centerY),400)};waitText("Task 2 of 3")
   runBlocking{assertTrue(app.db.dao().allTasks().all{it.status=="READY" && it.available==0L});assertFalse(app.db.dao().allEvents().any{it.kind in setOf("started","postponed","completed")})}
