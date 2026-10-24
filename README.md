@@ -30,6 +30,12 @@ These are real Android app captures with synthetic example content. Light theme 
 
 ![Momentum: Now, Focus, Projects and Progress](docs/images/momentum-4.0-english-grid.png)
 
+## Open the app. Know your next step.
+
+Start with **Add your first task**. Next time, **Continue this step** brings back the work you started, including your last progress note. Prefer something else? Choose from your task list. The optional **Where do I go?** guide explains each section and takes you there.
+
+![Three English home states: capture, start, and continue](docs/images/momentum-4.5-home.png)
+
 ## Your tasks come first
 
 A compact header puts the list near the top. Search expands when you need it; state explanations and advanced filters open in sheets. More tasks stay visible, with completion and reopening actions still close at hand.
@@ -89,8 +95,8 @@ Download the APK from the [latest release](https://github.com/Uriel1010/momentum
 
 | Download | Choose this when… |
 | --- | --- |
-| **`momentum-4.4.1-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
-| `momentum-4.4.1-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
+| **`momentum-4.5-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
+| `momentum-4.5-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
 | `SHA256SUMS.txt` | You want to verify download integrity. |
 
 Existing users can install the main release over the previous official version. Do not uninstall to work around a signing mismatch; make a backup first and check the signing identity. The optional QA APK is not needed for normal use.
@@ -113,8 +119,8 @@ chmod +x gradlew
 ./gradlew -PmomentumQa=true assembleDebug assembleDebugAndroidTest
 ```
 
-**Validation:** 46 JVM tests and six focused device tests passed for 4.4; release lint has zero errors. The preceding 4.1 release also passed 62 device test executions. Tested on one physical Android 16 device. Broader launcher and human accessibility review remain outstanding.
+**Validation:** 46 JVM tests and 15 focused device tests passed for 4.5; release lint has zero errors. The preceding 4.1 release also passed 62 device test executions. Tested on one physical Android 16 device. Broader launcher and human accessibility review remain outstanding.
 
-Release signing keys are not included. Copy build outputs before switching main/QA mode. [Developer guide](docs/DEVELOPMENT.md) · [Design system](docs/V4_VISUAL_SPEC.md) · [4.4 verification](docs/V44_QA_REPORT.md) · [4.4.1 color check](docs/V441_QA_REPORT.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+Release signing keys are not included. Copy build outputs before switching main/QA mode. [Developer guide](docs/DEVELOPMENT.md) · [Design system](docs/V4_VISUAL_SPEC.md) · [4.5 verification](docs/V45_QA_REPORT.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 Built for small, real actions. Improved with your feedback.

@@ -288,4 +288,24 @@
 <string name="task_filters">Filters</string>
 <string name="task_clear_filters">Clear filters</string>
 <string name="task_show_results">Show results</string>
+<string name="home_heading">Your next step.</string>
+<string name="home_empty_intro">Start with one thing you want to do. You can organize it later.</string>
+<string name="home_resume_intro">You already started. Pick up where you left off.</string>
+<string name="home_ready_intro">Here is one small task you can start now.</string>
+<string name="home_choose_intro">Review what is waiting, or capture something new.</string>
+<string name="home_first_title">What is on your mind?</string>
+<string name="home_first_body">Write a task or an idea. It goes into Tasks, and we will help you choose a first step.</string>
+<string name="home_add_first">Add your first task</string>
+<string name="home_add_next">Add another task</string>
+<string name="home_review_tasks">Review my tasks</string>
+<string name="home_choose_tasks">Choose from my tasks</string>
+<string name="home_manual_title">Choose what to work on</string>
+<string name="home_manual_body">Suggestions are off. Open your task list and pick the task you want to start.</string>
+<string name="home_adjust">Adjust suggestions</string>
+<string name="home_adjust_body">These options refine new suggestions. Your current task stays available to continue.</string>
+<string name="home_guide">Where do I go?</string>
+<string name="home_guide_intro">Start here for one next step. Use Capture a thought anytime to save an idea without interrupting your work.</string>
+<string name="home_tasks_help">Tasks — choose, edit, finish or reopen anything you saved.</string>
+<string name="home_projects_help">Projects — group related tasks when you need a bigger plan. This is optional.</string>
+<string name="home_progress_help">Progress — see what you started and completed. No setup needed.</string>
 </resources>

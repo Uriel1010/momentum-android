@@ -288,4 +288,24 @@
 <string name="task_filters">סינון</string>
 <string name="task_clear_filters">ניקוי סינון</string>
 <string name="task_show_results">הצגת תוצאות</string>
+<string name="home_heading">הצעד הבא שלך.</string>
+<string name="home_empty_intro">מתחילים בדבר אחד שרוצים לעשות. אפשר לסדר אחר כך.</string>
+<string name="home_resume_intro">כבר התחלת. אפשר להמשיך מאיפה שעצרת.</string>
+<string name="home_ready_intro">הנה משימה קטנה שאפשר להתחיל עכשיו.</string>
+<string name="home_choose_intro">אפשר לבדוק מה מחכה, או לשמור משהו חדש.</string>
+<string name="home_first_title">מה יש לך בראש?</string>
+<string name="home_first_body">כותבים משימה או רעיון. הם יישמרו במשימות, ומשם נבחר צעד ראשון.</string>
+<string name="home_add_first">הוספת המשימה הראשונה</string>
+<string name="home_add_next">הוספת משימה נוספת</string>
+<string name="home_review_tasks">למשימות שלי</string>
+<string name="home_choose_tasks">לבחור מתוך המשימות שלי</string>
+<string name="home_manual_title">בוחרים על מה לעבוד</string>
+<string name="home_manual_body">ההמלצות כבויות. פותחים את רשימת המשימות ובוחרים במה להתחיל.</string>
+<string name="home_adjust">התאמת המלצות</string>
+<string name="home_adjust_body">האפשרויות האלה משפיעות על המלצות חדשות. המשימה הנוכחית נשארת זמינה להמשך.</string>
+<string name="home_guide">לאן ממשיכים?</string>
+<string name="home_guide_intro">כאן מתחילים בצעד הבא. אפשר להשתמש בשמירת מחשבה בכל רגע כדי לשמור רעיון בלי להפסיק לעבוד.</string>
+<string name="home_tasks_help">משימות — בחירה, עריכה, השלמה או פתיחה מחדש של כל מה ששמרת.</string>
+<string name="home_projects_help">פרויקטים — קיבוץ משימות קשורות כשצריך תוכנית גדולה יותר. לא חובה.</string>
+<string name="home_progress_help">התקדמות — לראות מה התחלת ומה השלמת. אין צורך בהגדרה.</string>
 </resources>
