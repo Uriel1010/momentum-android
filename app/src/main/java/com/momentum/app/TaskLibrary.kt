@@ -37,8 +37,12 @@ import androidx.compose.ui.unit.*
   LazyColumn(Modifier.fillMaxWidth().testTag("taskStateList"),contentPadding=PaddingValues(start=20.dp,end=20.dp,bottom=32.dp)){
    item {Text(tr(R.string.task_view),style=MaterialTheme.typography.titleLarge);Text(tr(R.string.state_places),Modifier.padding(vertical=8.dp),style=MaterialTheme.typography.bodySmall)}
    items(states,key={it.first}){(id,label)->
-    Surface(onClick={filter=id;statesOpen=false},shape=RoundedCornerShape(12.dp),color=if(filter==id)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface){
-     ListItem(headlineContent={Text(label)},supportingContent={Text(tr(stateHelp(id)))},trailingContent={if(filter==id)Icon(Icons.Default.Check,null)},colors=ListItemDefaults.colors(containerColor=androidx.compose.ui.graphics.Color.Transparent))
+    val selected=filter==id
+    val colors=MaterialTheme.colorScheme
+    val foreground=if(selected)colors.onSecondaryContainer else colors.onSurface
+    val supporting=if(selected)colors.onSecondaryContainer else colors.onSurfaceVariant
+    Surface(onClick={filter=id;statesOpen=false},shape=RoundedCornerShape(12.dp),color=if(selected)colors.secondaryContainer else colors.surface,contentColor=foreground){
+     ListItem(headlineContent={Text(label)},supportingContent={Text(tr(stateHelp(id)))},trailingContent={if(filter==id)Icon(Icons.Default.Check,null)},colors=ListItemDefaults.colors(containerColor=androidx.compose.ui.graphics.Color.Transparent,headlineColor=foreground,supportingColor=supporting,trailingIconColor=foreground))
     }
    }
   }

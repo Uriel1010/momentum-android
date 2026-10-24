@@ -89,8 +89,8 @@ Download the APK from the [latest release](https://github.com/Uriel1010/momentum
 
 | Download | Choose this when… |
 | --- | --- |
-| **`momentum-4.4-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
-| `momentum-4.4-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
+| **`momentum-4.4.1-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
+| `momentum-4.4.1-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
 | `SHA256SUMS.txt` | You want to verify download integrity. |
 
 Existing users can install the main release over the previous official version. Do not uninstall to work around a signing mismatch; make a backup first and check the signing identity. The optional QA APK is not needed for normal use.
@@ -115,6 +115,6 @@ chmod +x gradlew
 
 **Validation:** 46 JVM tests and six focused device tests passed for 4.4; release lint has zero errors. The preceding 4.1 release also passed 62 device test executions. Tested on one physical Android 16 device. Broader launcher and human accessibility review remain outstanding.
 
-Release signing keys are not included. Copy build outputs before switching main/QA mode. [Developer guide](docs/DEVELOPMENT.md) · [Design system](docs/V4_VISUAL_SPEC.md) · [4.4 verification](docs/V44_QA_REPORT.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+Release signing keys are not included. Copy build outputs before switching main/QA mode. [Developer guide](docs/DEVELOPMENT.md) · [Design system](docs/V4_VISUAL_SPEC.md) · [4.4 verification](docs/V44_QA_REPORT.md) · [4.4.1 color check](docs/V441_QA_REPORT.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 Built for small, real actions. Improved with your feedback.
