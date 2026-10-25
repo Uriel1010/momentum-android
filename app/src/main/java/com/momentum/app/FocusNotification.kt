@@ -55,10 +55,12 @@ object FocusNotification {
   val open=PendingIntent.getActivity(context,701,MomentumWidget.focusIntent(context,id).setData("momentum://pinned/$id".toUri()),flags)
   val stop=PendingIntent.getBroadcast(context,702,Intent(context,FocusNotificationReceiver::class.java).setAction("com.momentum.UNPIN_FOCUS").setData("momentum://unpin/$token".toUri()).putExtra("token",token),flags)
   val publicVersion=NotificationCompat.Builder(local,CHANNEL).setSmallIcon(R.drawable.ic_notification_momentum).setContentTitle("Momentum").setContentText(local.getString(R.string.focus_notification_public)).build()
+  val project=app.db.dao().allProjects().find{it.id==task.projectId}
+  val body=listOfNotNull(project?.displayName(),task.nextAction.takeIf{it.isNotBlank()}).joinToString(" · ").ifBlank{local.getString(R.string.focus_notification_public)}
   val notification=NotificationCompat.Builder(local,CHANNEL).setSmallIcon(R.drawable.ic_notification_momentum)
-   .setContentTitle(task.title).setContentText(task.nextAction.ifBlank{local.getString(R.string.focus_notification_public)})
-   .setStyle(NotificationCompat.BigTextStyle().bigText(task.nextAction.ifBlank{local.getString(R.string.focus_notification_public)}))
-   .setSubText(local.getString(R.string.focus_notification_channel)).setContentIntent(open)
+   .setContentTitle(task.title).setContentText(body)
+   .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+   .setSubText(project?.displayName()?:local.getString(R.string.focus_notification_channel)).setContentIntent(open)
    .setOngoing(true).setAutoCancel(false).setSilent(true).setOnlyAlertOnce(true).setShowWhen(false)
    .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setPublicVersion(publicVersion)
    .addAction(0,local.getString(R.string.focus_notification_return),open)

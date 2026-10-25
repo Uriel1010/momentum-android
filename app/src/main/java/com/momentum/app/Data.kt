@@ -26,7 +26,7 @@ data class Task(
  @ColumnInfo(defaultValue="0") val repeatAnchor:Long=0
 )
 @Entity(tableName="projects")
-data class Project(@PrimaryKey val id:String=uuid(),val title:String,val description:String="",val summary:String="",val nextStep:String="",val paused:Boolean=false,val review:Long?=null,val created:Long=System.currentTimeMillis(),val updated:Long=created,@ColumnInfo(defaultValue="''") val emoji:String="")
+data class Project(@PrimaryKey val id:String=uuid(),val title:String,val description:String="",val summary:String="",val nextStep:String="",val paused:Boolean=false,val review:Long?=null,val created:Long=System.currentTimeMillis(),val updated:Long=created,@ColumnInfo(defaultValue="''") val emoji:String="",@ColumnInfo(defaultValue="'PURPLE'") val color:String="PURPLE")
 @Entity(tableName="events")
 data class Event(@PrimaryKey val id:String=uuid(),val taskId:String?=null,val projectId:String?=null,val kind:String,val note:String="",val created:Long=System.currentTimeMillis())
 @Entity(tableName="deliveries")
@@ -68,10 +68,13 @@ interface MomentumDao {
  @Query("DELETE FROM suggestions") suspend fun clearSuggestions()
  @Query("DELETE FROM events WHERE kind LIKE 'metric_%' OR kind IN ('captured','suggested','dismissed','notification_shown','notification_action')") suspend fun clearMetrics()
 }
-@Database(entities=[Task::class,Project::class,Event::class,Delivery::class,SuggestionRecord::class,DevelopmentIdea::class],version=5,exportSchema=true)
+@Database(entities=[Task::class,Project::class,Event::class,Delivery::class,SuggestionRecord::class,DevelopmentIdea::class],version=6,exportSchema=true)
 abstract class MomentumDb:RoomDatabase() {
  abstract fun dao():MomentumDao
  companion object {
+  val MIGRATION_5_6=object:Migration(5,6){
+   override fun migrate(db:SupportSQLiteDatabase){db.execSQL("ALTER TABLE projects ADD COLUMN color TEXT NOT NULL DEFAULT 'PURPLE'")}
+  }
   val MIGRATION_4_5=object:Migration(4,5) {
    override fun migrate(db:SupportSQLiteDatabase) {
     db.execSQL("ALTER TABLE tasks ADD COLUMN repeatMode TEXT NOT NULL DEFAULT 'NONE'")
@@ -116,7 +119,7 @@ class Preferences(private val context:Context) {
 }
 class MomentumApp:Application(), androidx.work.Configuration.Provider {
  val scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
- val db by lazy { Room.databaseBuilder(this,MomentumDb::class.java,"momentum.db").addMigrations(MomentumDb.MIGRATION_1_2,MomentumDb.MIGRATION_2_3,MomentumDb.MIGRATION_3_4,MomentumDb.MIGRATION_4_5).build() }
+ val db by lazy { Room.databaseBuilder(this,MomentumDb::class.java,"momentum.db").addMigrations(MomentumDb.MIGRATION_1_2,MomentumDb.MIGRATION_2_3,MomentumDb.MIGRATION_3_4,MomentumDb.MIGRATION_4_5,MomentumDb.MIGRATION_5_6).build() }
  val prefs by lazy { Preferences(this) }
  val repo by lazy { Repository(this,db,prefs) }
  override val workManagerConfiguration get()=androidx.work.Configuration.Builder().setMinimumLoggingLevel(android.util.Log.WARN).build()
@@ -189,7 +192,7 @@ class Repository(val context:Context,val db:MomentumDb,val prefs:Preferences) {
   dao.event(Event(projectId=p.id,kind="resumed",note=p.title))
   analytics.record("resumed")
  }
- suspend fun saveProject(p:Project){require(p.title.isNotBlank() && p.emoji.length<=32);dao.saveProject(p);scheduleProject(context,p)}
+ suspend fun saveProject(p:Project){require(p.title.isNotBlank() && p.emoji.length<=32 && p.color in ProjectColors.keys);dao.saveProject(p);scheduleProject(context,p)}
 
  suspend fun advance(t:Task,note:String) { require(note.isNotBlank());db.withTransaction {
   analytics.record("progress",t.id)

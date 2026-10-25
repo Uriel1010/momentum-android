@@ -28,6 +28,7 @@ class TaskStatesDeviceTest {
  }
  @Test fun editorStatusIsVisibleWithoutAdvancedAndArchiveRestores(){
   val task=Task(id="archive-test",title="Bring this back",status="ARCHIVED");runBlocking{app.repo.save(task)};open("task:"+task.id)
+  compose.onNodeWithText("Edit task",useUnmergedTree=true).performScrollTo().performClick()
   compose.waitUntil(10000){compose.onAllNodesWithTag("restoreTask").fetchSemanticsNodes().isNotEmpty()}
   compose.onNode(hasText("To do") and hasAnyAncestor(isDialog())).assertExists();compose.onNodeWithTag("restoreTask").performScrollTo().performClick()
   compose.waitUntil(10000){runBlocking{app.db.dao().task(task.id)?.status=="READY"}}

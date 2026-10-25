@@ -1,4 +1,6 @@
 package com.momentum.app
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.first
 
 @Composable fun ProjectEditor(old:Project?,onDismiss:()->Unit,onSave:(Project)->Unit) {
  var title by rememberSaveable(old?.id){mutableStateOf(old?.title?:"")}
+ var color by rememberSaveable(old?.id){mutableStateOf(old?.color?:"PURPLE")}
  var emoji by rememberSaveable(old?.id){mutableStateOf(old?.emoji?:"")}
  var description by rememberSaveable(old?.id){mutableStateOf(old?.description?:"")}
  var summary by rememberSaveable(old?.id){mutableStateOf(old?.summary?:"")}
@@ -27,11 +30,15 @@ import kotlinx.coroutines.flow.first
   OutlinedTextField(title,{title=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.title))})
   OutlinedTextField(emoji,{emoji=it.take(32)},Modifier.fillMaxWidth(),label={Text(tr(R.string.project_emoji))},singleLine=true)
   Choices(listOf("✈️","🏠","💼","📚","💪","🎯").map{it to it},emoji,{emoji=it})
+  Text(tr(R.string.project_color),style=MaterialTheme.typography.titleMedium)
+  Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)){
+   ProjectColors.keys.forEach{key->FilterChip(selected=color==key,onClick={color=key},label={Text(tr(ProjectColors.label(key)))},colors=FilterChipDefaults.filterChipColors(containerColor=ProjectColors.color(key),labelColor=Neo.Ink,selectedContainerColor=ProjectColors.color(key),selectedLabelColor=Neo.Ink),leadingIcon={if(color==key)Icon(Icons.Default.Check,null,tint=Neo.Ink)})}
+  }
   OutlinedTextField(description,{description=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.description))})
   OutlinedTextField(summary,{summary=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.where_stopped))})
   OutlinedTextField(next,{next=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.next_action))})
   DateField(tr(R.string.review),review,{review=it})
-  Button({onSave((old?:Project(title=title)).copy(title=title.trim(),emoji=emoji.trim(),description=description,summary=summary,nextStep=next,review=review,updated=System.currentTimeMillis()))},Modifier.fillMaxWidth(),enabled=title.isNotBlank()){Text(tr(R.string.save))}
+  Button({onSave((old?:Project(title=title)).copy(color=color,title=title.trim(),emoji=emoji.trim(),description=description,summary=summary,nextStep=next,review=review,updated=System.currentTimeMillis()))},Modifier.fillMaxWidth(),enabled=title.isNotBlank()){Text(tr(R.string.save))}
   TextButton(onDismiss){Text(tr(R.string.cancel))}
  }
 }

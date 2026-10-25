@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.*
  }.sortedWith(compareBy<Task>{if(it.status=="IN_PROGRESS")0 else if(it.priority==2)1 else 2}.thenByDescending{it.created})}
  if(statesOpen)ModalBottomSheet(onDismissRequest={statesOpen=false},sheetState=rememberModalBottomSheetState(skipPartiallyExpanded=true)){
   LazyColumn(Modifier.fillMaxWidth().testTag("taskStateList"),contentPadding=PaddingValues(start=20.dp,end=20.dp,bottom=32.dp)){
-   item {Text(tr(R.string.task_view),style=MaterialTheme.typography.titleLarge);Text(tr(R.string.state_places),Modifier.padding(vertical=8.dp),style=MaterialTheme.typography.bodySmall)}
+   item {Text(tr(R.string.task_view),style=MaterialTheme.typography.titleLarge)}
    items(states,key={it.first}){(id,label)->
     val selected=filter==id
     val colors=MaterialTheme.colorScheme
@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.*
   Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).imePadding().padding(20.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
    Text(tr(R.string.task_filters),style=MaterialTheme.typography.titleLarge)
    Text(tr(R.string.select_project))
-   Text(tr(R.string.scope_help),style=MaterialTheme.typography.bodySmall)
    Choices(listOf("personal" to tr(R.string.personal_tasks),"" to tr(R.string.all_tasks_scope))+projects.map{it.id to it.displayName()},project,{project=it})
    Text(tr(R.string.max_duration))
    Choices(listOf(0,5,15,30,60).map{it.toString() to if(it==0)tr(R.string.any) else "$it ${tr(R.string.minutes)}"},duration.toString(),{duration=it.toInt()})
@@ -87,7 +86,10 @@ import androidx.compose.ui.unit.*
       Column(Modifier.weight(1f).padding(vertical=2.dp),verticalArrangement=Arrangement.spacedBy(3.dp)) {
        Text(t.title,style=MaterialTheme.typography.bodyLarge,maxLines=2,overflow=TextOverflow.Ellipsis)
        val meta=listOfNotNull(tr(statusLabel(t.status)),projects.find{it.id==t.projectId}?.displayName(),t.estimate?.let{"$it ${tr(R.string.minutes)}"})
-       if(meta.isNotEmpty())Text(meta.joinToString(" · "),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant,maxLines=1,overflow=TextOverflow.Ellipsis)
+       if(meta.isNotEmpty())Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(4.dp)){
+        projects.find{it.id==t.projectId}?.let{Box(Modifier.size(8.dp).background(ProjectColors.color(it.color),CircleShape))}
+        Text(meta.joinToString(" · "),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant,maxLines=1,overflow=TextOverflow.Ellipsis)
+       }
        if(!active)TextButton({onReopen(t)},Modifier.testTag("reopen-"+t.id)){Text(tr(if(t.status=="DONE")R.string.state_reopen else R.string.state_restore))}
       }
       if(active && t.status!="WAITING")IconButton({onStart(t)}){Icon(Icons.Default.PlayArrow,tr(R.string.start),tint=MaterialTheme.colorScheme.primary)}

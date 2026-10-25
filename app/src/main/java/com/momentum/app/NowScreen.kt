@@ -106,7 +106,6 @@ import java.time.LocalTime
  LaunchedEffect(primary?.id){if(prefs.suggestions)primary?.let{vm.repo.analytics.record("recommended",it.id)}}
  Page(spacing=8.dp) {
   Column {Text(tr(R.string.home_heading),style=MaterialTheme.typography.titleLarge);InkUnderline()}
-  Text(tr(when{tasks.isEmpty()->R.string.home_empty_intro;deck.size>1->R.string.stack_intro;resume?.task?.id==primary?.id && resume!=null->R.string.home_resume_intro;primary!=null->R.string.home_ready_intro;else->R.string.home_choose_intro}),color=MaterialTheme.colorScheme.onSurfaceVariant)
   if(primary!=null)Box(Modifier.fillMaxWidth().testTag("starterStack").padding(horizontal=8.dp,vertical=8.dp).onSizeChanged{stackWidth=it.width.toFloat().coerceAtLeast(1f)}.pointerInput(deck.map{it.id},deckIndex,direction,prefs.reducedMotion){
    detectHorizontalDragGestures(onDragStart={if(!moving){dragOffset=0f;dragging=true}},onDragCancel={settleCard()},onDragEnd={
     if(!moving){if(kotlin.math.abs(dragOffset)>threshold){val forward=if(direction==LayoutDirection.Ltr)dragOffset<0 else dragOffset>0;nextCard(if(forward)1 else -1)}else settleCard()}
@@ -136,7 +135,7 @@ import java.time.LocalTime
     Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
      Icon(Icons.Default.Schedule,null,Modifier.size(18.dp))
      Text(t.estimate?.let{"$it "+tr(R.string.minutes)}?:tr(R.string.ux_your_pace_79575),style=MaterialTheme.typography.labelMedium)
-     projects.find{it.id==t.projectId}?.let{Text("· "+it.displayName(),Modifier.weight(1f),style=MaterialTheme.typography.labelMedium,maxLines=2,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)}
+     projects.find{it.id==t.projectId}?.let{ProjectBadge(it,Modifier.weight(1f))}
     }
     if(events.count{it.taskId==t.id && it.kind=="postponed"}>=3)Text(tr(R.string.ux_this_has_waited_a_few_times_just_the_f_307f9),style=MaterialTheme.typography.bodySmall)
     PrimaryAction(tr(if(resume?.task?.id==t.id)R.string.resume_action else R.string.start),{if(active && !moving)onStart(t)},modifier=if(active)Modifier.testTag("homePrimary") else Modifier,ink=true)

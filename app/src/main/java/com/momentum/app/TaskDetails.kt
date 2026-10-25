@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
   Text(tr(R.string.task_details),style=MaterialTheme.typography.labelLarge)
   Text(t.title,Modifier.testTag("taskDetailsTitle"),style=MaterialTheme.typography.headlineMedium)
   Text(tr(statusLabel(t.status)),style=MaterialTheme.typography.labelLarge)
-  projects.find{it.id==t.projectId}?.let{Text(it.displayName(),style=MaterialTheme.typography.titleSmall)}
+  projects.find{it.id==t.projectId}?.let{ProjectBadge(it)}
   if(t.nextAction.isNotBlank())Text(t.nextAction)
   if(t.notes.isNotBlank())Text(t.notes)
   if(t.status !in setOf("DONE","ARCHIVED","WAITING") && t.available<=System.currentTimeMillis())FocusPinControl(vm,t)

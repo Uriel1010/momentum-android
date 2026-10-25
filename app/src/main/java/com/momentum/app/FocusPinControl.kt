@@ -35,7 +35,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
    else if(FocusNotification.canPost(context))pin()
    else if(Build.VERSION.SDK_INT>=33)permission.launch(Manifest.permission.POST_NOTIFICATIONS)
   },Modifier.fillMaxWidth().heightIn(min=48.dp)){Text(tr(if(pinned==task.id)R.string.focus_notification_remove else R.string.focus_notification_pin))}
-  Text(tr(R.string.focus_notification_hint),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
   if(!available)TextButton({context.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE,context.packageName))}){Text(tr(R.string.focus_notification_settings))}
  }
 }

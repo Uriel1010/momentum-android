@@ -21,7 +21,6 @@ import java.time.*
  val visible=projects.filter{filter=="all" || (filter=="paused")==it.paused}
  LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(24.dp,20.dp,24.dp,32.dp),verticalArrangement=Arrangement.spacedBy(18.dp)) {
   item {Text(tr(R.string.neo_projects_heading),style=MaterialTheme.typography.displaySmall)}
-  item {Text(tr(R.string.ux_keep_the_thread_return_to_the_next_ste_abf5f),color=MaterialTheme.colorScheme.onSurfaceVariant)}
   item {Choices(listOf("all" to tr(R.string.dev_all),"active" to tr(R.string.ux_active_a733b),"paused" to tr(R.string.ux_paused_c7dfb)),filter){filter=it}}
   item {TextButton(onAdd,Modifier.heightIn(min=48.dp)){Icon(Icons.Default.Add,null);Spacer(Modifier.width(8.dp));Text(tr(R.string.new_project))}}
   if(visible.isEmpty())item {QuietPanel{Text(tr(R.string.project_empty))}}
@@ -29,7 +28,7 @@ import java.time.*
    val steps=tasks.filter{it.projectId==p.id && it.status!="ARCHIVED"};val done=steps.count{it.status=="DONE"}
    Column(Modifier.fillMaxWidth().clickable(role=androidx.compose.ui.semantics.Role.Button,onClick={onOpen(p)}).padding(vertical=8.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
     Row(verticalAlignment=Alignment.Top,horizontalArrangement=Arrangement.spacedBy(16.dp)) {
-     Box(Modifier.size(52.dp).background(if(p.paused)Neo.Purple else MaterialTheme.colorScheme.surfaceVariant,RoundedCornerShape(12.dp)),contentAlignment=Alignment.Center){Icon(if(p.paused)Icons.Default.Pause else Icons.Default.FolderOpen,null,tint=if(p.paused)Neo.Ink else MaterialTheme.colorScheme.onSurface)}
+     Box(Modifier.size(52.dp).background(ProjectColors.color(p.color),RoundedCornerShape(12.dp)),contentAlignment=Alignment.Center){Icon(if(p.paused)Icons.Default.Pause else Icons.Default.FolderOpen,null,tint=Neo.Ink)}
      Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(8.dp)) {
       Text(p.displayName(),style=MaterialTheme.typography.titleLarge)
       Text(p.nextStep.ifBlank{tr(R.string.ux_choose_a_project_step_70297)},style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant,maxLines=2,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -55,12 +54,10 @@ import java.time.*
  val blocked=tasks.filter{it.status=="WAITING"}
  Page(spacing=22.dp) {
   Eyebrow(if(p.paused)tr(R.string.ux_paused_c7dfb) else tr(R.string.project))
-  Text(p.displayName(),style=MaterialTheme.typography.displaySmall)
+  ProjectBadge(p)
   if(p.description.isNotBlank())Text(p.description,style=MaterialTheme.typography.bodyLarge)
   QuietPanel {
-   Eyebrow(tr(R.string.where_stopped))
-   Text(p.summary.ifBlank{tr(R.string.ux_your_progress_will_be_kept_here_4459a)},style=MaterialTheme.typography.bodyLarge)
-   HorizontalDivider()
+   if(p.summary.isNotBlank()){Eyebrow(tr(R.string.where_stopped));Text(p.summary,style=MaterialTheme.typography.bodyLarge);HorizontalDivider()}
    Eyebrow(tr(R.string.next_action))
    Text(p.nextStep.ifBlank{next?.nextAction?.ifBlank{next.title}?:tr(R.string.ux_what_will_the_first_step_be_78bb2)},style=MaterialTheme.typography.headlineSmall)
    if(next!=null && !p.paused)PrimaryAction(tr(R.string.start),{onStart(next)})
@@ -82,7 +79,6 @@ import java.time.*
   }}
   Heading(tr(R.string.history))
   TextButton({milestone=true}){Icon(Icons.Default.Flag,null);Spacer(Modifier.width(8.dp));Text(tr(R.string.ux_mark_a_milestone_d161d))}
-  if(meaningful.isEmpty())Text(tr(R.string.ux_the_steps_you_take_will_appear_here_dc44c))
   val history=events.filter{it.kind in setOf("started","completed","advanced","milestone","blocked","resumed")}
   if(history.size>5)TextButton({expandedHistory=!expandedHistory}){Text(tr(if(expandedHistory)R.string.v3_less else R.string.history))}
   (if(expandedHistory)history else history.take(5)).forEach {e->TimelineEntry(e)}
@@ -112,7 +108,6 @@ import java.time.*
  val visible=if(all)history else recent
  LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(24.dp,20.dp,24.dp,32.dp),verticalArrangement=Arrangement.spacedBy(16.dp)) {
   item {Column{Text(tr(R.string.neo_progress_heading),style=MaterialTheme.typography.displaySmall);InkUnderline()}}
-  item {Text(if(returned)tr(R.string.ux_you_came_back_continue_from_here_2d8dd) else tr(R.string.neo_small_steps),color=MaterialTheme.colorScheme.onSurfaceVariant)}
   item {Choices(listOf("week" to tr(R.string.v3_this_week),"all" to tr(R.string.history)),if(all)"all" else "week"){all=it=="all"}}
   item {
    val metrics=listOf(Triple(tr(R.string.neo_starts),visible.count{it.kind=="started"},Neo.Lime),Triple(tr(R.string.neo_advances),visible.count{it.kind=="advanced"},Neo.Purple),Triple(tr(R.string.neo_completions),visible.count{it.kind=="completed"},MaterialTheme.colorScheme.surfaceVariant))
@@ -121,7 +116,7 @@ import java.time.*
   }
   item {ActivityBars(history)}
   item {HorizontalDivider();Spacer(Modifier.height(12.dp));Eyebrow(tr(R.string.history))}
-  if(visible.isEmpty())item {Text(tr(R.string.no_progress));Text(tr(R.string.v3_no_history),color=MaterialTheme.colorScheme.onSurfaceVariant)}
+  if(visible.isEmpty())item {Text(tr(R.string.no_progress))}
   items(visible,key={it.id}){e->Column{if(e.kind=="started" && tasks.any{it.id==e.taskId && e.created-it.created>=7*86_400_000L})Eyebrow(tr(R.string.ux_what_waited_is_moving_5b64b));TimelineEntry(e)}}
  }
 }
