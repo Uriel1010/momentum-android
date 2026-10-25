@@ -30,6 +30,14 @@ These are real Android app captures with synthetic example content. Light theme 
 
 ![Momentum: Now, Focus, Projects and Progress](docs/images/momentum-4.0-english-grid.png)
 
+## From a thought to a task you can act on
+
+**Save** opens your new task immediately. **Save and pin to notifications** keeps it in sight when you next pick up your phone. Change its time estimate—including a one-hour option—or set a reminder right from the task screen.
+
+Build routines with **fixed daily, weekly or monthly schedules**, or repeat **after completion**. Personal tasks have their own view; switch to **All tasks** to include clearly labeled projects. Give each project an emoji to make it easy to recognize.
+
+<p><img src="docs/images/momentum-4.7-tasks.png" alt="Compact personal task list" width="30%"> <img src="docs/images/momentum-4.7-detail.png" alt="One-hour task with after-completion repeat controls" width="30%"> <img src="docs/images/momentum-4.7-home.png" alt="Compact Home with a labeled project task" width="30%"></p>
+
 ## A stack of starting points
 
 Swipe the loosely stacked cards to choose from up to five tasks. The front card follows your finger, then moves away to reveal the actual task underneath. The next card keeps its color as it moves forward, using a palette of up to five colors. Your unfinished work comes first, followed by suggestions from your own tasks. Previous/Next buttons offer the same control. Browsing does not change a task; press Start when you are ready.
@@ -105,8 +113,8 @@ Download the APK from the [latest release](https://github.com/Uriel1010/momentum
 
 | Download | Choose this when… |
 | --- | --- |
-| **`momentum-4.6.2-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
-| `momentum-4.6.2-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
+| **`momentum-4.7-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
+| `momentum-4.7-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
 | `SHA256SUMS.txt` | You want to verify download integrity. |
 
 Existing users can install the main release over the previous official version. Do not uninstall to work around a signing mismatch; make a backup first and check the signing identity. The optional QA APK is not needed for normal use.

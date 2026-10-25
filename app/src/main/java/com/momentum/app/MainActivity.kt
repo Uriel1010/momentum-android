@@ -169,7 +169,7 @@ val LocalEnglish=staticCompositionLocalOf {false}
    HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
    Row(Modifier.fillMaxWidth().navigationBarsPadding().selectableGroup()) {
     val destinations=listOf(Triple("now",R.string.now,Icons.Default.Adjust),Triple("tasks",R.string.tasks,Icons.AutoMirrored.Filled.List),Triple("projects",R.string.projects,Icons.Default.FolderOpen),Triple("progress",R.string.progress,Icons.Default.BarChart))
-    destinations.forEach{(r,label,icon)->Column(Modifier.weight(1f).heightIn(min=68.dp).selectable(selected=route==r,role=Role.Tab,onClick={nav.navigate(r){popUpTo("now"){saveState=true};launchSingleTop=true;restoreState=true}}).padding(horizontal=4.dp,vertical=10.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(4.dp)) {
+    destinations.forEach{(r,label,icon)->Column(Modifier.weight(1f).heightIn(min=56.dp).selectable(selected=route==r,role=Role.Tab,onClick={nav.navigate(r){popUpTo("now"){saveState=true};launchSingleTop=true;restoreState=true}}).padding(horizontal=4.dp,vertical=5.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(4.dp)) {
      Icon(icon,null,Modifier.size(24.dp),tint=if(route==r)MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)
      Text(tr(label),style=MaterialTheme.typography.labelSmall,maxLines=2,textAlign=androidx.compose.ui.text.style.TextAlign.Center,color=if(route==r)MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)
      Box(Modifier.width(18.dp).height(3.dp).background(if(route==r)Neo.Lime else Color.Transparent))
@@ -184,6 +184,7 @@ val LocalEnglish=staticCompositionLocalOf {false}
     scope.launch {if(snackbar.showSnackbar(savedLabel,undoLabel)==SnackbarResult.ActionPerformed)vm.work{vm.repo.delete(t)}}
    }},onQuickCapture={newTask=true;initialText="";taskProject=null},onProject={nav.navigate("project/"+it.id)},onProjects={nav.navigate("projects")},onProgress={nav.navigate("progress")},onLater={t->vm.work {vm.repo.postpone(t,3_600_000);if(snackbar.showSnackbar(context.getString(R.string.defer_hour),undoLabel)==SnackbarResult.ActionPerformed)vm.repo.undoPostpone(t)}}) }
    composable("tasks") {TaskScreen(tasks,projects,onEdit=::edit,onStart={pulse(context,prefs.feedback,Touch.START);vm.work{vm.repo.start(it);nav.navigate("focus/${it.id}")}},onComplete={complete(it)},onReopen={task->vm.work{vm.repo.dao.task(task.id)?.let{vm.repo.save(TaskStates.reopened(it))}};message(R.string.state_reopened)})}
+   composable("detail/{id}"){entry->tasks.find{it.id==entry.arguments?.getString("id")}?.let{t->TaskDetails(vm,t,projects,onEdit={edit(t)},onStart={vm.work{vm.repo.start(t);nav.navigate("focus/${t.id}")}},onComplete={complete(t)})}}
    composable("focus/{id}") {entry->val task=tasks.find{it.id==entry.arguments?.getString("id")}
     if(task!=null)FocusScreen(vm,task,prefs,onComplete={complete(task){nav.popBackStack()}},onEdit={edit(task)},onExit={nav.popBackStack()})
    }
@@ -197,14 +198,26 @@ val LocalEnglish=staticCompositionLocalOf {false}
   }
  }
  }
- if(newTask)CaptureSheet(initialText,taskProject,projects,onDismiss={newTask=false;initialText="";taskProject=null},onSave={t->vm.work {
+ var pinAfterSave by rememberSaveable{mutableStateOf<String?>(null)}
+ val pinPermission=rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()){granted->
+  val id=pinAfterSave;pinAfterSave=null
+  if(granted && id!=null)vm.work{if(!FocusNotification.pin(context,id))vm.messages.emit(R.string.focus_notification_permission)}
+  else message(R.string.focus_notification_permission)
+ }
+ fun saveCaptured(t:Task,pin:Boolean){vm.work{
   vm.repo.save(t);newTask=false;initialText="";taskProject=null
-  if(snackbar.showSnackbar(savedLabel,undoLabel)==SnackbarResult.ActionPerformed)vm.repo.delete(t)
- }})
+  nav.navigate("detail/${t.id}"){launchSingleTop=true}
+  if(pin){
+   if(FocusNotification.canPost(context)){if(!FocusNotification.pin(context,t.id))message(R.string.focus_notification_permission)}
+   else if(Build.VERSION.SDK_INT>=33){pinAfterSave=t.id;pinPermission.launch(Manifest.permission.POST_NOTIFICATIONS)}
+   else message(R.string.focus_notification_permission)
+  }
+ }}
+ if(newTask)CaptureSheet(initialText,taskProject,projects,onDismiss={newTask=false;initialText="";taskProject=null},onSave={saveCaptured(it,false)},onSavePinned={saveCaptured(it,true)})
  if(editorId!=null) {
   val old=tasks.find{it.id==editorId}
   TaskEditor(old,initialText,taskProject,projects,onDismiss={newTask=false;editorId=null;initialText="";taskProject=null},
-   onSave={t->vm.work{vm.repo.save(t);if(old==null)vm.repo.metric("captured",t.id)};newTask=false;editorId=null;initialText="";taskProject=null;message(R.string.saved)},
+   onSave={t->vm.work{vm.repo.save(t);if(old==null)vm.repo.metric("captured",t.id);nav.navigate("detail/${t.id}"){launchSingleTop=true}};newTask=false;editorId=null;initialText="";taskProject=null;message(R.string.saved)},
    onDelete={t->vm.work{vm.repo.delete(t)};newTask=false;editorId=null;scope.launch {if(snackbar.showSnackbar(deletedLabel,undoLabel)==SnackbarResult.ActionPerformed)vm.work{vm.repo.save(t)}}})
  }
  if(newProject || projectEditor!=null)ProjectEditor(projects.find{it.id==projectEditor},onDismiss={newProject=false;projectEditor=null},onSave={p->vm.work{vm.repo.saveProject(p)};newProject=false;projectEditor=null})

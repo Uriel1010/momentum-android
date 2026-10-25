@@ -13,7 +13,7 @@ class TaskStatesDeviceTest {
  private fun open(id:String){
   compose.waitUntil(10000){compose.onAllNodesWithText("Tasks").fetchSemanticsNodes().isNotEmpty()}
   compose.onNodeWithText("Tasks").performClick()
-  if(id.startsWith("task:")){compose.onNodeWithTag("taskStatePicker").performClick();compose.onNodeWithTag("taskStateList").performScrollToNode(hasText("Archive"));compose.onNodeWithText("Archive").performClick();compose.onNodeWithTag("taskList").performScrollToNode(hasText("Bring this back"));compose.onNodeWithText("Bring this back").performClick()}
+  if(id.startsWith("task:")){compose.onNodeWithTag("taskStatePicker").performClick();compose.onNodeWithTag("taskStateList").performScrollToNode(hasText("Archive"));compose.onNodeWithText("Archive").performClick();compose.onNodeWithTag("taskList").performScrollToNode(hasText("Bring this back"));compose.onNodeWithText("Bring this back",useUnmergedTree=true).performClick()}
  }
  @Test fun completedTaskCanBeReopenedFromList(){
   val task=Task(id="reopen-test",title="Reopen this task",notes="Keep my details",available=System.currentTimeMillis()+86400000)

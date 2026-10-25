@@ -1,0 +1,20 @@
+<resources>
+<string name="save_pin">שמירה והצמדה להתראות</string>
+<string name="project_emoji">אימוג׳י לפרויקט</string>
+<string name="personal_tasks">אישיות</string>
+<string name="all_tasks_scope">כל המשימות</string>
+<string name="repeat_title">חזרה</string>
+<string name="repeat_none">ללא חזרה</string>
+<string name="repeat_fixed">לוח זמנים קבוע</string>
+<string name="repeat_after">לאחר השלמה</string>
+<string name="repeat_every">כל</string>
+<string name="repeat_day">ימים</string>
+<string name="repeat_week">שבועות</string>
+<string name="repeat_month">חודשים</string>
+<string name="repeat_anchor">תחילת לוח הזמנים</string>
+<string name="repeat_fixed_help">השלמה יוצרת את המופע העתידי הבא בלוח הזמנים. מועדים שחלפו מדולגים.</string>
+<string name="repeat_after_help">המרווח מתחיל ברגע השלמת המשימה.</string>
+<string name="task_details">פרטי המשימה</string>
+<string name="one_hour">שעה</string>
+<string name="scope_help">משימות אישיות מוצגות בנפרד. בחרו בכל המשימות כדי לכלול פרויקטים.</string>
+</resources>

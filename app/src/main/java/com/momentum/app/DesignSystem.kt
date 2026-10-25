@@ -67,11 +67,11 @@ else lightColorScheme(
 @Composable fun QuietPanel(modifier:Modifier=Modifier,content:@Composable ColumnScope.()->Unit) {
  Column(modifier.fillMaxWidth().clip(Rhythm.card).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(20.dp),verticalArrangement=Arrangement.spacedBy(12.dp),content=content)
 }
-@Composable fun ActionPanel(fill:Color=Neo.Lime,content:@Composable ColumnScope.()->Unit) {
+@Composable fun ActionPanel(fill:Color=Neo.Lime,compact:Boolean=false,content:@Composable ColumnScope.()->Unit) {
  Box(Modifier.fillMaxWidth().padding(bottom=5.dp,end=5.dp).drawBehind {
   drawRoundRect(Neo.Ink,topLeft=Offset(5.dp.toPx(),5.dp.toPx()),cornerRadius=androidx.compose.ui.geometry.CornerRadius(22.dp.toPx()))
  }) {
-  Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(fill).border(2.dp,Neo.Ink,RoundedCornerShape(22.dp)).padding(22.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
+  Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(fill).border(2.dp,Neo.Ink,RoundedCornerShape(22.dp)).padding(if(compact)16.dp else 22.dp),verticalArrangement=Arrangement.spacedBy(if(compact)8.dp else 14.dp)) {
    CompositionLocalProvider(LocalContentColor provides Neo.Ink,content={content()})
   }
  }

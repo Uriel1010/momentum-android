@@ -31,7 +31,7 @@ import java.time.*
     Row(verticalAlignment=Alignment.Top,horizontalArrangement=Arrangement.spacedBy(16.dp)) {
      Box(Modifier.size(52.dp).background(if(p.paused)Neo.Purple else MaterialTheme.colorScheme.surfaceVariant,RoundedCornerShape(12.dp)),contentAlignment=Alignment.Center){Icon(if(p.paused)Icons.Default.Pause else Icons.Default.FolderOpen,null,tint=if(p.paused)Neo.Ink else MaterialTheme.colorScheme.onSurface)}
      Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(8.dp)) {
-      Text(p.title,style=MaterialTheme.typography.titleLarge)
+      Text(p.displayName(),style=MaterialTheme.typography.titleLarge)
       Text(p.nextStep.ifBlank{tr(R.string.ux_choose_a_project_step_70297)},style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant,maxLines=2,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)
       Text("\u2066$done / ${steps.size}\u2069 · "+tr(R.string.ux_steps_completed_880fd),style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
       LinearProgressIndicator(progress={if(steps.isEmpty())0f else done.toFloat()/steps.size},modifier=Modifier.fillMaxWidth().height(7.dp),color=if(p.paused)Neo.Purple else if(androidx.compose.foundation.isSystemInDarkTheme())Neo.Lime else Neo.Ink,trackColor=MaterialTheme.colorScheme.surfaceVariant)
@@ -55,7 +55,7 @@ import java.time.*
  val blocked=tasks.filter{it.status=="WAITING"}
  Page(spacing=22.dp) {
   Eyebrow(if(p.paused)tr(R.string.ux_paused_c7dfb) else tr(R.string.project))
-  Text(p.title,style=MaterialTheme.typography.displaySmall)
+  Text(p.displayName(),style=MaterialTheme.typography.displaySmall)
   if(p.description.isNotBlank())Text(p.description,style=MaterialTheme.typography.bodyLarge)
   QuietPanel {
    Eyebrow(tr(R.string.where_stopped))

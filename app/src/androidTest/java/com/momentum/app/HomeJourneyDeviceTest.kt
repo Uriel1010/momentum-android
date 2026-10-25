@@ -17,7 +17,7 @@ class HomeJourneyDeviceTest {
  @Test fun firstTaskHasOneClearCaptureThenStart(){
   waitText("Add your first task");compose.onNodeWithTag("homePrimary").assertIsDisplayed();shot("empty")
   compose.onNodeWithTag("homePrimary").performClick();waitText("Capture a thought");compose.onNodeWithTag("quickCapture").assertIsFocused().performTextInput("Read five pages");compose.onNodeWithTag("quickCapture").performImeAction()
-  waitText("Read five pages");compose.onNodeWithTag("homePrimary").assertIsDisplayed();shot("ready");compose.onNodeWithTag("homePrimary").performClick();waitText("I’m done")
+  waitText("Read five pages");compose.onNodeWithTag("taskDetailsTitle").assertIsDisplayed();shot("ready");compose.onNodeWithTag("detailStart").performScrollTo().performClick();waitText("I’m done")
  }
  @Test fun returnPrioritizesOneTaskWithoutDuplicateCards(){
   runBlocking{val task=Task(title="Write the opening paragraph",nextAction="Open the outline");app.repo.save(task);app.repo.start(task);app.repo.advance(task,"Three key points are ready");app.repo.save(Task(title="Another task",priority=2))}

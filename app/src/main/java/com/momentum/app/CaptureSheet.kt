@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.*
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable fun CaptureSheet(initial:String,projectId:String?,projects:List<Project>,onDismiss:()->Unit,onSave:(Task)->Unit) {
+@Composable fun CaptureSheet(initial:String,projectId:String?,projects:List<Project>,onDismiss:()->Unit,onSave:(Task)->Unit,onSavePinned:(Task)->Unit={onSave(it)}) {
  var title by rememberSaveable{mutableStateOf(initial)}
  var step by rememberSaveable{mutableStateOf("")}
  var estimate by rememberSaveable{mutableStateOf<Int?>(null)}
@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
  val focus=remember{FocusRequester()}
  val keyboard=LocalSoftwareKeyboardController.current
  val sheet=rememberModalBottomSheetState(skipPartiallyExpanded=true)
- fun save(){if(title.isNotBlank()){keyboard?.hide();onSave(Task(title=title.trim(),projectId=projectId,nextAction=step.trim(),estimate=estimate))}}
+ fun save(pin:Boolean=false){if(title.isNotBlank()){keyboard?.hide();(if(pin)onSavePinned else onSave)(Task(title=title.trim(),status="READY",projectId=projectId,nextAction=step.trim(),estimate=estimate))}}
  ModalBottomSheet(onDismissRequest=onDismiss,sheetState=sheet) {
   val window=LocalWindowInfo.current
   LaunchedEffect(sheet.currentValue,window.isWindowFocused){
@@ -30,13 +30,14 @@ import androidx.compose.ui.unit.dp
   }
   Column(Modifier.fillMaxWidth().imePadding().verticalScroll(rememberScrollState()).padding(horizontal=24.dp).padding(bottom=24.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
    Heading(tr(R.string.v3_capture))
-   projectId?.let{id->projects.find{it.id==id}?.let{Eyebrow(it.title)}}
+   projectId?.let{id->projects.find{it.id==id}?.let{Eyebrow(it.displayName())}}
    OutlinedTextField(title,{title=it},Modifier.fillMaxWidth().focusRequester(focus).testTag("quickCapture"),label={Text(tr(R.string.capture))},maxLines=5,keyboardOptions=KeyboardOptions(imeAction=ImeAction.Done),keyboardActions=KeyboardActions(onDone={save()}))
-   PrimaryAction(tr(R.string.save),::save,enabled=title.isNotBlank())
+   PrimaryAction(tr(R.string.save),{save()},enabled=title.isNotBlank())
+   OutlinedButton({save(true)},Modifier.fillMaxWidth().testTag("saveAndPin"),enabled=title.isNotBlank()){Text(tr(R.string.save_pin))}
    TextButton({details=!details}){Text(tr(R.string.v3_details))}
    if(details){
     OutlinedTextField(step,{step=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.next_action))})
-    Choices(listOf("" to tr(R.string.v3_no_estimate),"2" to "2 "+tr(R.string.minutes),"5" to "5 "+tr(R.string.minutes),"15" to "15 "+tr(R.string.minutes)),estimate?.toString()?:"",{estimate=it.toIntOrNull()})
+    Choices(listOf("" to tr(R.string.v3_no_estimate),"2" to "2 "+tr(R.string.minutes),"5" to "5 "+tr(R.string.minutes),"15" to "15 "+tr(R.string.minutes),"30" to "30 "+tr(R.string.minutes),"60" to tr(R.string.one_hour)),estimate?.toString()?:"",{estimate=it.toIntOrNull()})
    }
   }
  }

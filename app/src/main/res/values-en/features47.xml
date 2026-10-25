@@ -1,0 +1,20 @@
+<resources>
+<string name="save_pin">Save and pin to notifications</string>
+<string name="project_emoji">Project emoji</string>
+<string name="personal_tasks">Personal</string>
+<string name="all_tasks_scope">All tasks</string>
+<string name="repeat_title">Repeat</string>
+<string name="repeat_none">Does not repeat</string>
+<string name="repeat_fixed">Fixed schedule</string>
+<string name="repeat_after">After completion</string>
+<string name="repeat_every">Every</string>
+<string name="repeat_day">Days</string>
+<string name="repeat_week">Weeks</string>
+<string name="repeat_month">Months</string>
+<string name="repeat_anchor">Schedule starts</string>
+<string name="repeat_fixed_help">Completing creates the next future occurrence on this schedule. Missed dates are skipped.</string>
+<string name="repeat_after_help">The interval starts when you complete this task.</string>
+<string name="task_details">Task details</string>
+<string name="one_hour">1 hour</string>
+<string name="scope_help">Personal tasks are separate. Choose All tasks to include projects.</string>
+</resources>

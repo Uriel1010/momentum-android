@@ -18,17 +18,20 @@ import kotlinx.coroutines.flow.first
 
 @Composable fun ProjectEditor(old:Project?,onDismiss:()->Unit,onSave:(Project)->Unit) {
  var title by rememberSaveable(old?.id){mutableStateOf(old?.title?:"")}
+ var emoji by rememberSaveable(old?.id){mutableStateOf(old?.emoji?:"")}
  var description by rememberSaveable(old?.id){mutableStateOf(old?.description?:"")}
  var summary by rememberSaveable(old?.id){mutableStateOf(old?.summary?:"")}
  var next by rememberSaveable(old?.id){mutableStateOf(old?.nextStep?:"")}
  var review by rememberSaveable(old?.id){mutableStateOf(old?.review)}
  EditorShell(tr(if(old==null)R.string.new_project else R.string.edit_project),onDismiss) {
   OutlinedTextField(title,{title=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.title))})
+  OutlinedTextField(emoji,{emoji=it.take(32)},Modifier.fillMaxWidth(),label={Text(tr(R.string.project_emoji))},singleLine=true)
+  Choices(listOf("✈️","🏠","💼","📚","💪","🎯").map{it to it},emoji,{emoji=it})
   OutlinedTextField(description,{description=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.description))})
   OutlinedTextField(summary,{summary=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.where_stopped))})
   OutlinedTextField(next,{next=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.next_action))})
   DateField(tr(R.string.review),review,{review=it})
-  Button({onSave((old?:Project(title=title)).copy(title=title.trim(),description=description,summary=summary,nextStep=next,review=review,updated=System.currentTimeMillis()))},Modifier.fillMaxWidth(),enabled=title.isNotBlank()){Text(tr(R.string.save))}
+  Button({onSave((old?:Project(title=title)).copy(title=title.trim(),emoji=emoji.trim(),description=description,summary=summary,nextStep=next,review=review,updated=System.currentTimeMillis()))},Modifier.fillMaxWidth(),enabled=title.isNotBlank()){Text(tr(R.string.save))}
   TextButton(onDismiss){Text(tr(R.string.cancel))}
  }
 }

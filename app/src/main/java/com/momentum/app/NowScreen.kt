@@ -104,10 +104,10 @@ import java.time.LocalTime
  }
  fun settleCard(){if(moving)return;scope.launch(start=CoroutineStart.UNDISPATCHED){motion.snapTo(dragOffset);dragging=false;motion.animateTo(0f,spring(dampingRatio=.85f,stiffness=500f));dragOffset=0f}}
  LaunchedEffect(primary?.id){if(prefs.suggestions)primary?.let{vm.repo.analytics.record("recommended",it.id)}}
- Page(spacing=14.dp) {
-  Column {Text(tr(R.string.home_heading),style=MaterialTheme.typography.headlineLarge);InkUnderline()}
+ Page(spacing=8.dp) {
+  Column {Text(tr(R.string.home_heading),style=MaterialTheme.typography.titleLarge);InkUnderline()}
   Text(tr(when{tasks.isEmpty()->R.string.home_empty_intro;deck.size>1->R.string.stack_intro;resume?.task?.id==primary?.id && resume!=null->R.string.home_resume_intro;primary!=null->R.string.home_ready_intro;else->R.string.home_choose_intro}),color=MaterialTheme.colorScheme.onSurfaceVariant)
-  if(primary!=null)Box(Modifier.fillMaxWidth().testTag("starterStack").padding(horizontal=8.dp,vertical=14.dp).onSizeChanged{stackWidth=it.width.toFloat().coerceAtLeast(1f)}.pointerInput(deck.map{it.id},deckIndex,direction,prefs.reducedMotion){
+  if(primary!=null)Box(Modifier.fillMaxWidth().testTag("starterStack").padding(horizontal=8.dp,vertical=8.dp).onSizeChanged{stackWidth=it.width.toFloat().coerceAtLeast(1f)}.pointerInput(deck.map{it.id},deckIndex,direction,prefs.reducedMotion){
    detectHorizontalDragGestures(onDragStart={if(!moving){dragOffset=0f;dragging=true}},onDragCancel={settleCard()},onDragEnd={
     if(!moving){if(kotlin.math.abs(dragOffset)>threshold){val forward=if(direction==LayoutDirection.Ltr)dragOffset<0 else dragOffset>0;nextCard(if(forward)1 else -1)}else settleCard()}
    }){change,amount->if(deck.size>1 && !moving){change.consume();dragOffset=(dragOffset+amount).coerceIn(-stackWidth,stackWidth);slideDirection=if((dragOffset<0)==(direction==LayoutDirection.Ltr))1 else -1}}
@@ -125,18 +125,18 @@ import java.time.LocalTime
      scaleY=if(active)1f else 1f-effectiveDepth*.025f
      rotationZ=if(prefs.reducedMotion)0f else if(active)-1.2f+(visualDrag/stackWidth)*10f else angle+(-1.2f-angle)*promotion
     }){
-    ActionPanel(fill=palette[index%palette.size]) {
+    ActionPanel(compact=true,fill=palette[index%palette.size]) {
     Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
      Text(tr(if(resume?.task?.id==t.id)R.string.resume_title else R.string.neo_next_small),style=MaterialTheme.typography.labelMedium,modifier=Modifier.weight(1f))
      Icon(Icons.Default.NorthEast,null,Modifier.size(24.dp))
     }
-    Text(t.title,style=MaterialTheme.typography.headlineMedium)
+    Text(t.title,style=MaterialTheme.typography.headlineSmall,maxLines=3,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)
     if(resume?.task?.id==t.id && resume.note.isNotBlank())Text(tr(R.string.resume_last)+" "+resume.note,style=MaterialTheme.typography.bodyMedium,maxLines=2,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)
     Text(t.nextAction.ifBlank{tr(R.string.ux_start_without_committing_to_finish_2562a)},style=MaterialTheme.typography.bodyMedium)
     Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
      Icon(Icons.Default.Schedule,null,Modifier.size(18.dp))
      Text(t.estimate?.let{"$it "+tr(R.string.minutes)}?:tr(R.string.ux_your_pace_79575),style=MaterialTheme.typography.labelMedium)
-     projects.find{it.id==t.projectId}?.let{Text("· "+it.title,Modifier.weight(1f),style=MaterialTheme.typography.labelMedium,maxLines=2,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)}
+     projects.find{it.id==t.projectId}?.let{Text("· "+it.displayName(),Modifier.weight(1f),style=MaterialTheme.typography.labelMedium,maxLines=2,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)}
     }
     if(events.count{it.taskId==t.id && it.kind=="postponed"}>=3)Text(tr(R.string.ux_this_has_waited_a_few_times_just_the_f_307f9),style=MaterialTheme.typography.bodySmall)
     PrimaryAction(tr(if(resume?.task?.id==t.id)R.string.resume_action else R.string.start),{if(active && !moving)onStart(t)},modifier=if(active)Modifier.testTag("homePrimary") else Modifier,ink=true)
@@ -181,7 +181,7 @@ import java.time.LocalTime
   Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).imePadding().padding(24.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
    Text(tr(R.string.home_adjust),style=MaterialTheme.typography.titleLarge)
    Text(tr(R.string.home_adjust_body),style=MaterialTheme.typography.bodyMedium)
-   Choices(listOf(0,2,5,15,30).map{it.toString() to if(it==0)tr(R.string.ux_your_pace_79575) else "$it ${tr(R.string.minutes)}"},minutes.toString(),{minutes=it.toInt()})
+   Choices(listOf(0,2,5,15,30,60).map{it.toString() to if(it==0)tr(R.string.ux_your_pace_79575) else "$it ${tr(R.string.minutes)}"},minutes.toString(),{minutes=it.toInt()})
    Toggle(tr(R.string.ux_something_easier_2fe57),easy,{easy=it})
    OutlinedTextField(selectedContext,{selectedContext=it},Modifier.fillMaxWidth(),label={Text(tr(R.string.context))})
    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){TextButton({minutes=0;easy=false;selectedContext=""}){Text(tr(R.string.task_clear_filters))};Button({showConditions=false}){Text(tr(R.string.task_show_results))}}

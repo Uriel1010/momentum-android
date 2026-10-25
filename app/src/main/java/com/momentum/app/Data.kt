@@ -19,10 +19,14 @@ data class Task(
  val projectId:String?=null, val due:Long?=null, val available:Long=0,
  val contexts:String="", val nextAction:String="", val reminder:Long?=null,
  val created:Long=System.currentTimeMillis(), val updated:Long=created,
- val completed:Long?=null, val lastConsidered:Long=0
+ val completed:Long?=null, val lastConsidered:Long=0,
+ @ColumnInfo(defaultValue="'NONE'") val repeatMode:String="NONE",
+ @ColumnInfo(defaultValue="'DAY'") val repeatUnit:String="DAY",
+ @ColumnInfo(defaultValue="1") val repeatEvery:Int=1,
+ @ColumnInfo(defaultValue="0") val repeatAnchor:Long=0
 )
 @Entity(tableName="projects")
-data class Project(@PrimaryKey val id:String=uuid(),val title:String,val description:String="",val summary:String="",val nextStep:String="",val paused:Boolean=false,val review:Long?=null,val created:Long=System.currentTimeMillis(),val updated:Long=created)
+data class Project(@PrimaryKey val id:String=uuid(),val title:String,val description:String="",val summary:String="",val nextStep:String="",val paused:Boolean=false,val review:Long?=null,val created:Long=System.currentTimeMillis(),val updated:Long=created,@ColumnInfo(defaultValue="''") val emoji:String="")
 @Entity(tableName="events")
 data class Event(@PrimaryKey val id:String=uuid(),val taskId:String?=null,val projectId:String?=null,val kind:String,val note:String="",val created:Long=System.currentTimeMillis())
 @Entity(tableName="deliveries")
@@ -64,10 +68,19 @@ interface MomentumDao {
  @Query("DELETE FROM suggestions") suspend fun clearSuggestions()
  @Query("DELETE FROM events WHERE kind LIKE 'metric_%' OR kind IN ('captured','suggested','dismissed','notification_shown','notification_action')") suspend fun clearMetrics()
 }
-@Database(entities=[Task::class,Project::class,Event::class,Delivery::class,SuggestionRecord::class,DevelopmentIdea::class],version=4,exportSchema=true)
+@Database(entities=[Task::class,Project::class,Event::class,Delivery::class,SuggestionRecord::class,DevelopmentIdea::class],version=5,exportSchema=true)
 abstract class MomentumDb:RoomDatabase() {
  abstract fun dao():MomentumDao
  companion object {
+  val MIGRATION_4_5=object:Migration(4,5) {
+   override fun migrate(db:SupportSQLiteDatabase) {
+    db.execSQL("ALTER TABLE tasks ADD COLUMN repeatMode TEXT NOT NULL DEFAULT 'NONE'")
+    db.execSQL("ALTER TABLE tasks ADD COLUMN repeatUnit TEXT NOT NULL DEFAULT 'DAY'")
+    db.execSQL("ALTER TABLE tasks ADD COLUMN repeatEvery INTEGER NOT NULL DEFAULT 1")
+    db.execSQL("ALTER TABLE tasks ADD COLUMN repeatAnchor INTEGER NOT NULL DEFAULT 0")
+    db.execSQL("ALTER TABLE projects ADD COLUMN emoji TEXT NOT NULL DEFAULT ''")
+   }
+  }
   val MIGRATION_3_4=object:Migration(3,4) {
    override fun migrate(db:SupportSQLiteDatabase) {
     db.execSQL("ALTER TABLE development_ideas ADD COLUMN category TEXT NOT NULL DEFAULT 'FEATURE'")
@@ -103,7 +116,7 @@ class Preferences(private val context:Context) {
 }
 class MomentumApp:Application(), androidx.work.Configuration.Provider {
  val scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
- val db by lazy { Room.databaseBuilder(this,MomentumDb::class.java,"momentum.db").addMigrations(MomentumDb.MIGRATION_1_2,MomentumDb.MIGRATION_2_3,MomentumDb.MIGRATION_3_4).build() }
+ val db by lazy { Room.databaseBuilder(this,MomentumDb::class.java,"momentum.db").addMigrations(MomentumDb.MIGRATION_1_2,MomentumDb.MIGRATION_2_3,MomentumDb.MIGRATION_3_4,MomentumDb.MIGRATION_4_5).build() }
  val prefs by lazy { Preferences(this) }
  val repo by lazy { Repository(this,db,prefs) }
  override val workManagerConfiguration get()=androidx.work.Configuration.Builder().setMinimumLoggingLevel(android.util.Log.WARN).build()
@@ -128,9 +141,11 @@ class Repository(val context:Context,val db:MomentumDb,val prefs:Preferences) {
  }
  suspend fun metric(kind:String,id:String?=null) { if(prefs.flow.first().metrics) dao.event(Event(taskId=id,kind=kind)) }
  suspend fun save(t:Task) {
-  require(t.title.isNotBlank())
+  require(t.title.isNotBlank());Recurrence.validate(t)
   val now=System.currentTimeMillis()
   val saved=t.copy(title=t.title.trim(),updated=now,completed=if(t.status=="DONE")t.completed?:now else null)
+  var next:Task?=null
+  var removed:String?=null
   db.withTransaction {
    val before=dao.task(t.id)
    dao.save(saved)
@@ -138,31 +153,26 @@ class Repository(val context:Context,val db:MomentumDb,val prefs:Preferences) {
    if(saved.status=="DONE" && before?.status!="DONE"){
     dao.event(Event(taskId=t.id,projectId=t.projectId,kind="completed",note=t.title,created=saved.completed!!))
     analytics.record("completed",t.id)
+    val candidate=Recurrence.next(saved,now)
+    if(candidate!=null && dao.task(candidate.id)==null){dao.save(candidate);next=candidate}
    }
    if(saved.status=="IN_PROGRESS" && before?.status!="IN_PROGRESS"){
     dao.event(Event(taskId=t.id,projectId=t.projectId,kind="started",note=t.title))
     analytics.record("started",t.id)
    }
+   if(saved.status!="DONE" && before?.status=="DONE") {
+    val child=dao.task(Recurrence.childId(t.id))
+    if(child!=null && child.status=="READY" && child.updated==child.created && dao.allEvents().none{it.taskId==child.id}){dao.delete(child.id);removed=child.id}
+   }
    if(saved.status!="DONE" && before?.status=="DONE")dao.allEvents().filter{it.taskId==t.id && it.kind in setOf("completed","metric_completed") && it.created>=(before.completed?:Long.MAX_VALUE)}.forEach{dao.deleteEvent(it.id)}
   }
-  schedule(context,saved)
+  schedule(context,saved);next?.let{schedule(context,it)};removed?.let{cancelReminder(context,it)}
  }
  suspend fun complete(t:Task) { db.withTransaction {
   val current=dao.task(t.id)?:return@withTransaction
-  if(current.status!="DONE") {
-   dao.save(current.copy(status="DONE",completed=System.currentTimeMillis(),updated=System.currentTimeMillis()))
-   dao.event(Event(taskId=t.id,projectId=t.projectId,kind="completed",note=t.title))
-   analytics.record("completed",t.id)
-  }
- }; cancelReminder(context,t.id) }
- suspend fun undo(t:Task) {
-  db.withTransaction {
-   val current=dao.task(t.id)?:return@withTransaction
-   dao.save(t.copy(updated=System.currentTimeMillis()))
-   dao.allEvents().filter {it.taskId==t.id && it.kind in setOf("completed","metric_completed") && it.created>=(current.completed?:Long.MAX_VALUE)}.forEach {dao.deleteEvent(it.id)}
-  }
-  schedule(context,t)
- }
+  if(current.status!="DONE")save(current.copy(status="DONE"))
+ } }
+ suspend fun undo(t:Task) { save(t) }
  suspend fun delete(t:Task) { dao.delete(t.id); cancelReminder(context,t.id) }
  suspend fun start(t:Task) {db.withTransaction {
   val current=dao.task(t.id)?:return@withTransaction
@@ -179,7 +189,7 @@ class Repository(val context:Context,val db:MomentumDb,val prefs:Preferences) {
   dao.event(Event(projectId=p.id,kind="resumed",note=p.title))
   analytics.record("resumed")
  }
- suspend fun saveProject(p:Project){dao.saveProject(p);scheduleProject(context,p)}
+ suspend fun saveProject(p:Project){require(p.title.isNotBlank() && p.emoji.length<=32);dao.saveProject(p);scheduleProject(context,p)}
 
  suspend fun advance(t:Task,note:String) { require(note.isNotBlank());db.withTransaction {
   analytics.record("progress",t.id)
