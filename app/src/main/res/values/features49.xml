@@ -1,0 +1,12 @@
+<resources>
+<string name="today">היום</string>
+<string name="today_count">היום · %1$d</string>
+<string name="today_more">ועוד %1$d — לפתיחת היום</string>
+<string name="today_open">פתיחת היום</string>
+<string name="today_clear">ניקוי הרשימה</string>
+<string name="today_add">הצמדה להתראת היום</string>
+<string name="today_remove">הסרה מהתראת היום</string>
+<string name="today_choose">בחירת משימות</string>
+<string name="today_empty">בחרו את המשימות שתרצו לראות בהתראה.</string>
+<string name="today_hint">התראה אחת. המשימות נשארות עד השלמה או הסרה.</string>
+</resources>

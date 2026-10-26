@@ -24,12 +24,12 @@ class Features48Test {
   compose.waitUntil(10000){compose.onAllNodesWithText("Tasks").fetchSemanticsNodes().isNotEmpty()};compose.onNodeWithText("Tasks").performClick();waitTag("taskScope")
   compose.onNodeWithTag("taskScope").performClick();compose.onNodeWithText("All tasks").performClick();compose.onNodeWithText("Show results").performClick()
   compose.onNodeWithText("Book hotel",useUnmergedTree=true).performClick();waitTag("taskDetailsTitle")
-  compose.onNodeWithText("✈️ Summer trip").assertIsDisplayed();compose.onNodeWithText("Keep in notifications").performClick()
+  compose.onNodeWithText("✈️ Summer trip").assertIsDisplayed();compose.onNodeWithText("Pin to Today notification").performClick()
   compose.waitUntil(10000){FocusNotification.pinnedId(app)==t.id}
   compose.waitUntil(10000){app.getSystemService(android.app.NotificationManager::class.java).activeNotifications.isNotEmpty()}
   shot("task")
   val n=app.getSystemService(android.app.NotificationManager::class.java).activeNotifications.single().notification
-  assertEquals("Book hotel",n.extras.getCharSequence(Notification.EXTRA_TITLE).toString())
+  assertTrue(n.extras.getCharSequence(Notification.EXTRA_TITLE).toString().startsWith("Today"));assertTrue(n.extras.getCharSequence(Notification.EXTRA_TEXT).toString().contains("Book hotel"))
   assertTrue(n.extras.getCharSequence(Notification.EXTRA_TEXT).toString().contains("✈️ Summer trip"))
   assertFalse(n.publicVersion.extras.getCharSequence(Notification.EXTRA_TEXT).toString().contains("Summer trip"))
   runBlocking{app.repo.saveProject(p.copy(title="Autumn trip",emoji="🍂"));FocusNotification.refresh(app)}

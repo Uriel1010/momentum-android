@@ -121,6 +121,7 @@ val LocalEnglish=staticCompositionLocalOf {false}
  LaunchedEffect(shared) {if(shared.isNotBlank()){initialText=shared;newTask=true;consumeShare()}}
  LaunchedEffect(focusId,loaded) {if(loaded && focusId!=null) {
   when {
+   focusId=="list:today"->nav.navigate("today"){launchSingleTop=true}
    focusId=="list:tasks"->nav.navigate("tasks"){launchSingleTop=true}
    focusId.startsWith("task:")-> {val id=focusId.removePrefix("task:");if(vm.repo.dao.task(id)!=null)nav.navigate("detail/$id"){launchSingleTop=true}}
    else->nav.navigate(if(focusId.startsWith("project:"))"project/"+focusId.removePrefix("project:") else "focus/$focusId")
@@ -183,8 +184,9 @@ val LocalEnglish=staticCompositionLocalOf {false}
    composable("now") { NowScreen(vm,tasks,projects,prefs,onStart={t->pulse(context,prefs.feedback,Touch.START);vm.work {vm.repo.start(t);nav.navigate("focus/${t.id}")}},onBrowse={nav.navigate("tasks")},onCapture={value->vm.work {
     val t=Task(title=value);vm.repo.save(t);vm.repo.metric("captured",t.id)
     scope.launch {if(snackbar.showSnackbar(savedLabel,undoLabel)==SnackbarResult.ActionPerformed)vm.work{vm.repo.delete(t)}}
-   }},onQuickCapture={newTask=true;initialText="";taskProject=null},onProject={nav.navigate("project/"+it.id)},onProjects={nav.navigate("projects")},onProgress={nav.navigate("progress")},onLater={t->vm.work {vm.repo.postpone(t,3_600_000);if(snackbar.showSnackbar(context.getString(R.string.defer_hour),undoLabel)==SnackbarResult.ActionPerformed)vm.repo.undoPostpone(t)}}) }
-   composable("tasks") {TaskScreen(tasks,projects,onEdit=::openTask,onStart={pulse(context,prefs.feedback,Touch.START);vm.work{vm.repo.start(it);nav.navigate("focus/${it.id}")}},onComplete={complete(it)},onReopen={task->vm.work{vm.repo.dao.task(task.id)?.let{vm.repo.save(TaskStates.reopened(it))}};message(R.string.state_reopened)})}
+   }},onQuickCapture={newTask=true;initialText="";taskProject=null},onProject={nav.navigate("project/"+it.id)},onProjects={nav.navigate("projects")},onProgress={nav.navigate("progress")},onToday={nav.navigate("today")},onLater={t->vm.work {vm.repo.postpone(t,3_600_000);if(snackbar.showSnackbar(context.getString(R.string.defer_hour),undoLabel)==SnackbarResult.ActionPerformed)vm.repo.undoPostpone(t)}}) }
+   composable("tasks") {TaskScreen(tasks,projects,onToday={nav.navigate("today")},onEdit=::openTask,onStart={pulse(context,prefs.feedback,Touch.START);vm.work{vm.repo.start(it);nav.navigate("focus/${it.id}")}},onComplete={complete(it)},onReopen={task->vm.work{vm.repo.dao.task(task.id)?.let{vm.repo.save(TaskStates.reopened(it))}};message(R.string.state_reopened)})}
+   composable("today"){TodayScreen(vm,tasks,projects,onOpen=::openTask)}
    composable("detail/{id}"){entry->tasks.find{it.id==entry.arguments?.getString("id")}?.let{t->TaskDetails(vm,t,projects,onEdit={edit(t)},onStart={vm.work{vm.repo.start(t);nav.navigate("focus/${t.id}")}},onComplete={complete(t)})}}
    composable("focus/{id}") {entry->val task=tasks.find{it.id==entry.arguments?.getString("id")}
     if(task!=null)FocusScreen(vm,task,prefs,onComplete={complete(task){nav.popBackStack()}},onEdit={edit(task)},onExit={nav.popBackStack()})

@@ -15,7 +15,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable fun TaskScreen(tasks:List<Task>,projects:List<Project>,onEdit:(Task)->Unit,onStart:(Task)->Unit,onComplete:(Task)->Unit,onReopen:(Task)->Unit) {
+@Composable fun TaskScreen(tasks:List<Task>,projects:List<Project>,onEdit:(Task)->Unit,onStart:(Task)->Unit,onComplete:(Task)->Unit,onReopen:(Task)->Unit,onToday:()->Unit={}) {
  val keyboard=LocalSoftwareKeyboardController.current
  var search by rememberSaveable {mutableStateOf("")}
  var filter by rememberSaveable {mutableStateOf("open")}
@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.*
    Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){
     Text(tr(R.string.tasks),style=MaterialTheme.typography.titleLarge)
     Text(" · ${filtered.size}",Modifier.weight(1f),style=MaterialTheme.typography.titleMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
+    IconButton(onToday,Modifier.testTag("openToday")){Icon(Icons.Default.Today,tr(R.string.today))}
     IconButton({searchOpen=!searchOpen;if(!searchOpen){search="";keyboard?.hide()}},Modifier.testTag("taskSearchToggle")){Icon(if(searchOpen)Icons.Default.Close else Icons.Default.Search,tr(R.string.search))}
     IconButton({filters=true},Modifier.testTag("taskFilters")){BadgedBox(badge={if(extraCount>0)Badge{Text(extraCount.toString())}}){Icon(Icons.Default.Tune,tr(R.string.task_filters))}}
    }

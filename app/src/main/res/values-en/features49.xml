@@ -1,0 +1,12 @@
+<resources>
+<string name="today">Today</string>
+<string name="today_count">Today · %1$d</string>
+<string name="today_more">+%1$d more — open Today</string>
+<string name="today_open">Open Today</string>
+<string name="today_clear">Clear Today</string>
+<string name="today_add">Pin to Today notification</string>
+<string name="today_remove">Remove from Today notification</string>
+<string name="today_choose">Choose tasks</string>
+<string name="today_empty">Choose the tasks you want to keep in sight.</string>
+<string name="today_hint">One notification. Tasks stay here until completed or removed.</string>
+</resources>

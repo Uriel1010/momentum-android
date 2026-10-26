@@ -59,7 +59,7 @@ import java.time.LocalTime
  }
 }
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable fun NowScreen(vm:MomentumViewModel,tasks:List<Task>,projects:List<Project>,prefs:Prefs,onStart:(Task)->Unit,onBrowse:()->Unit,onCapture:(String)->Unit,onLater:(Task)->Unit,onQuickCapture:()->Unit,onProject:(Project)->Unit,onProjects:()->Unit,onProgress:()->Unit) {
+@Composable fun NowScreen(vm:MomentumViewModel,tasks:List<Task>,projects:List<Project>,prefs:Prefs,onStart:(Task)->Unit,onBrowse:()->Unit,onCapture:(String)->Unit,onLater:(Task)->Unit,onQuickCapture:()->Unit,onProject:(Project)->Unit,onProjects:()->Unit,onProgress:()->Unit,onToday:()->Unit={}) {
  var minutes by rememberSaveable {mutableIntStateOf(0)}
  var easy by rememberSaveable {mutableStateOf(false)}
  var selectedContext by rememberSaveable {mutableStateOf("")}
@@ -105,7 +105,7 @@ import java.time.LocalTime
  fun settleCard(){if(moving)return;scope.launch(start=CoroutineStart.UNDISPATCHED){motion.snapTo(dragOffset);dragging=false;motion.animateTo(0f,spring(dampingRatio=.85f,stiffness=500f));dragOffset=0f}}
  LaunchedEffect(primary?.id){if(prefs.suggestions)primary?.let{vm.repo.analytics.record("recommended",it.id)}}
  Page(spacing=8.dp) {
-  Column {Text(tr(R.string.home_heading),style=MaterialTheme.typography.titleLarge);InkUnderline()}
+  Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){Column(Modifier.weight(1f)){Text(tr(R.string.home_heading),style=MaterialTheme.typography.titleLarge);InkUnderline()};TextButton(onToday,Modifier.testTag("openToday")){Text(tr(R.string.today))}}
   if(primary!=null)Box(Modifier.fillMaxWidth().testTag("starterStack").padding(horizontal=8.dp,vertical=8.dp).onSizeChanged{stackWidth=it.width.toFloat().coerceAtLeast(1f)}.pointerInput(deck.map{it.id},deckIndex,direction,prefs.reducedMotion){
    detectHorizontalDragGestures(onDragStart={if(!moving){dragOffset=0f;dragging=true}},onDragCancel={settleCard()},onDragEnd={
     if(!moving){if(kotlin.math.abs(dragOffset)>threshold){val forward=if(direction==LayoutDirection.Ltr)dragOffset<0 else dragOffset>0;nextCard(if(forward)1 else -1)}else settleCard()}

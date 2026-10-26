@@ -17,7 +17,7 @@ Momentum gives you a place to catch that thought—and a clear way back. Its hom
 | --- | --- |
 | Have a thought you want to keep | Tap the **1×1 capture widget** and type immediately. |
 | Have plenty to do and need a starting point | Choose **one small next action** that fits your time. |
-| Pick up your phone in the middle of a task | See an optional **silent assignment notification**, then tap to return. |
+| Pick up your phone in the middle of a task | See your chosen tasks in one **silent Today notification**, then tap to return. |
 | Feel stuck | Make the step smaller, postpone it, or record what you are waiting for. |
 | Need a break | Pause on a calm recovery screen. Continue when ready. |
 | Come back after a while | Find the last progress note and the next step you left yourself. |
@@ -90,9 +90,11 @@ Active tasks come first. Waiting, scheduled and paused-project tasks remain visi
 
 **A tiny capture widget.** Add the new 1×1 widget from Settings → Add 1×1 thought widget, then confirm placement in your launcher. One tap opens the capture sheet with the keyboard ready. The larger next-action widget is still available. Version 4.1.1 includes both a launcher preview layout and a static preview image for launcher compatibility.
 
-**Your current assignment, quietly visible.** Open a task in Focus and choose Keep in notifications. Its title and next action stay in a silent notification. Tap to return, or choose Remove from notifications. One assignment is pinned at a time; finishing, postponing, blocking, deleting the task, or pausing its project clears it. Removing the notification does not complete the task.
+**Your plan for today, quietly visible.** Open **Today** from Home or Tasks and choose several tasks. They share one silent notification, including project names and emoji. Adding tasks does not start them. Expand to preview up to six tasks; a count shows how many more are in the full list. Tap to open Today, remove individual tasks, or clear the selection. Completed tasks disappear from the list; unfinished selections stay until you remove them.
 
-Notification permission is required. Android controls lock-screen visibility and may allow you to dismiss an ongoing notification; Momentum respects that dismissal. This feature uses no always-running foreground service. Widget dimensions and placement depend on your launcher.
+<img src="docs/images/momentum-4.9-today.png" alt="Choose multiple tasks for one Today notification" width="360">
+
+Notification permission is required. Android controls lock-screen visibility and may allow you to dismiss an ongoing notification; Your Today selection remains available in the app even if the notification is dismissed. This feature uses no always-running foreground service. Widget dimensions and placement depend on your launcher.
 
 ## Make room for real progress
 
@@ -119,8 +121,8 @@ Download the APK from the [latest release](https://github.com/Uriel1010/momentum
 
 | Download | Choose this when… |
 | --- | --- |
-| **`momentum-4.8-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
-| `momentum-4.8-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
+| **`momentum-4.9-release.apk`** | **You want to use Momentum.** Small, optimized, non-debuggable, private release signing. |
+| `momentum-4.9-qa.apk` | You want a separate developer test app. It has a purple icon and creates a second installation. |
 | `SHA256SUMS.txt` | You want to verify download integrity. |
 
 Existing users can install the main release over the previous official version. Do not uninstall to work around a signing mismatch; make a backup first and check the signing identity. The optional QA APK is not needed for normal use.

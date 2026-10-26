@@ -24,8 +24,8 @@ class Features47UiTest {
   waitTag("homePrimary");compose.onNodeWithTag("homePrimary").performClick();waitTag("quickCapture");compose.onNodeWithTag("quickCapture").performTextInput("Write the first paragraph")
   compose.onNodeWithTag("saveAndPin").performScrollTo().performClick();waitTag("taskDetailsTitle")
   compose.waitUntil(10000){FocusNotification.pinnedId(app)!=null}
-  runBlocking{assertEquals(app.db.dao().allTasks().single().id,FocusNotification.pinnedId(app));assertEquals("IN_PROGRESS",app.db.dao().allTasks().single().status)}
-  assertTrue(app.getSystemService(android.app.NotificationManager::class.java).activeNotifications.isNotEmpty());shot("pinned")
+  runBlocking{assertEquals(app.db.dao().allTasks().single().id,FocusNotification.pinnedId(app));assertEquals("READY",app.db.dao().allTasks().single().status)}
+  compose.waitUntil(10000){app.getSystemService(android.app.NotificationManager::class.java).activeNotifications.isNotEmpty()};shot("pinned")
  }
  @Test fun personalScopeExcludesProjectsAndAllLabelsThem(){
   runBlocking{val p=Project(title="Summer trip",emoji="✈️");app.repo.saveProject(p);app.repo.save(Task(title="Book the hotel",projectId=p.id));repeat(8){app.repo.save(Task(title="Personal step ${it+1}"))}}

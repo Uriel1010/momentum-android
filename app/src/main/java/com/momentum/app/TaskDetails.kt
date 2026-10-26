@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
   projects.find{it.id==t.projectId}?.let{ProjectBadge(it)}
   if(t.nextAction.isNotBlank())Text(t.nextAction)
   if(t.notes.isNotBlank())Text(t.notes)
-  if(t.status !in setOf("DONE","ARCHIVED","WAITING") && t.available<=System.currentTimeMillis())FocusPinControl(vm,t)
+  if(t.status !in setOf("DONE","ARCHIVED"))FocusPinControl(vm,t)
   Text(tr(R.string.estimate),style=MaterialTheme.typography.titleMedium)
   Choices(listOf("" to tr(R.string.v3_no_estimate),"5" to "5", "15" to "15", "30" to "30", "60" to tr(R.string.one_hour)),t.estimate?.toString()?:"",{v->vm.work{vm.repo.save(t.copy(estimate=v.toIntOrNull()))}})
   DateField(tr(R.string.reminder),t.reminder,{v->vm.work{vm.repo.save(t.copy(reminder=v))}})
